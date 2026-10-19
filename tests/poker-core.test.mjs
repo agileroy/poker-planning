@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   CARDS, MESSAGES, validatePseudo, pseudoKey, isNumericCard,
   buildRoomView, computeResults, formatMean, newRoundUpdate,
-  INACTIVITY_MS, HEARTBEAT_MS, SWEEP_MS, isInactive, computeExtremes,
+  INACTIVITY_MS, HEARTBEAT_MS, SWEEP_MS, isInactive, computeExtremes, voteCountLabel,
 } from '../site/js/poker-core.js';
 
 const here = { c1: true };
@@ -261,4 +261,41 @@ test('vue non révélée : aucun extrême exposé', () => {
   }, 'a');
   assert.equal(view.results, null);
   assert.equal(view.participants[0].extreme, undefined);
+});
+
+// ---------------------------------------------------------------- Mode observateur
+
+const withObserver = (overrides = {}) => ({
+  state: { round: 1, revealed: false },
+  participants: {
+    uJulie: { pseudo: 'Julie', connections: here },
+    uMarc: { pseudo: 'Marc', connections: here },
+    uLea: { pseudo: 'Léa', connections: here, observer: true },
+  },
+  votes: { uJulie: { value: '3', round: 1 }, uLea: { value: '5', round: 1 } },
+  ...overrides,
+});
+
+test('compteur sans les observateurs : « 1 / 2 vote · 1 observateur »', () => {
+  const view = buildRoomView(withObserver(), 'uJulie');
+  assert.equal(view.voterCount, 2);
+  assert.equal(view.observerCount, 1);
+  assert.equal(voteCountLabel(view), '1 / 2 vote · 1 observateur');
+  assert.equal(voteCountLabel({ voteCount: 2, voterCount: 3, observerCount: 0 }), '2 / 3 votes');
+  assert.equal(voteCountLabel({ voteCount: 0, voterCount: 1, observerCount: 2 }), '0 / 1 vote · 2 observateurs');
+});
+
+test('vote d\'un observateur ignoré, même révélé', () => {
+  const view = buildRoomView(withObserver({ state: { round: 1, revealed: true } }), 'uJulie');
+  const lea = view.participants.find((p) => p.pseudo === 'Léa');
+  assert.equal(lea.observer, true);
+  assert.equal(lea.hasVoted, false);
+  assert.equal(lea.vote, null);
+  assert.equal(view.results.voteCount, 1);
+});
+
+test('un observateur ne peut pas voter mais peut révéler', () => {
+  const view = buildRoomView(withObserver(), 'uLea');
+  assert.equal(view.canVote, false);
+  assert.equal(view.canReveal, true);
 });

@@ -121,8 +121,15 @@
       </div>
 
       <section class="deck-panel" aria-labelledby="deck-title">
-        <h2 id="deck-title" class="deck-title">Votre carte</h2>
+        <div class="deck-head">
+          <h2 id="deck-title" class="deck-title">Votre carte</h2>
+          <div class="role-switch" role="radiogroup" aria-label="Votre rôle">
+            <button type="button" role="radio" class="role-option" id="role-voter" aria-checked="true">Je vote</button>
+            <button type="button" role="radio" class="role-option" id="role-observer" aria-checked="false">J'observe</button>
+          </div>
+        </div>
         <div class="deck" id="deck" role="group" aria-labelledby="deck-title"></div>
+        <p class="observer-note" id="observer-note" hidden>Vous observez ce vote.</p>
         <p class="hint" id="deck-hint"></p>
       </section>
     </section>

@@ -111,10 +111,12 @@ export function buildRoomView(raw, myUid, now = Date.now()) {
     .filter(([, participant]) => isPresent(participant) && typeof participant.pseudo === 'string')
     .map(([uid, participant]) => {
       const isMe = uid === myUid;
-      const value = voteOf(uid);
+      const observer = participant.observer === true;
+      const value = observer ? null : voteOf(uid);   // le vote d'un observateur n'est jamais compté
       return {
         uid,
         pseudo: participant.pseudo,
+        observer,
         isMe,
         hasVoted: value !== null,
         vote: revealed || isMe ? value : null,
@@ -143,11 +145,20 @@ export function buildRoomView(raw, myUid, now = Date.now()) {
     me,
     myVote: me ? me.vote : voteOf(myUid),
     voteCount: voters.length,
+    voterCount: participants.filter((p) => !p.observer).length,
+    observerCount: participants.filter((p) => p.observer).length,
     inactive: participants.filter((p) => p.inactive),
-    canVote: !revealed,
+    canVote: !revealed && !(me?.observer),
     canReveal: !revealed && voters.length > 0,
     results,
   };
+}
+
+/** Libellé du compteur : « 2 / 3 votes », suivi de « · 1 observateur » s'il y en a. */
+export function voteCountLabel({ voteCount, voterCount, observerCount }) {
+  let label = `${voteCount} / ${voterCount} ${voteCount > 1 ? 'votes' : 'vote'}`;
+  if (observerCount > 0) label += ` · ${observerCount} ${observerCount > 1 ? 'observateurs' : 'observateur'}`;
+  return label;
 }
 
 // ---------------------------------------------------------------- Inactivité

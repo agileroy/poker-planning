@@ -101,6 +101,13 @@ export function createRoomStore(firebaseConfig) {
     }
   }
 
+  /** Choisit de voter ou d'observer ; un observateur retire son vote du tour en cours. */
+  async function setObserver(observer) {
+    touch();
+    await set(ref(db, `${ROOM}/participants/${uid}/observer`), observer).catch(() => {});
+    if (observer) await clearVote();
+  }
+
   /** Change de pseudo : réserve le nouveau, l'affiche, libère l'ancien. */
   async function changePseudo(oldPseudo, newPseudo) {
     if (!(await claimPseudo(newPseudo))) return false;
@@ -160,7 +167,7 @@ export function createRoomStore(firebaseConfig) {
   }
 
   return {
-    start, serverNow, removeParticipants, stopPresence, touch, onRoom, onConnection, claimPseudo, enter, changePseudo, vote, clearVote, reveal, newRound, leave,
+    start, serverNow, removeParticipants, stopPresence, touch, setObserver, onRoom, onConnection, claimPseudo, enter, changePseudo, vote, clearVote, reveal, newRound, leave,
     get uid() { return uid; },
   };
 }

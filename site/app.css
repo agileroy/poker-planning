@@ -294,7 +294,35 @@ main { max-width: 960px; margin: 0 auto; padding: 0 16px 32px; }
 
 /* ---------------------------------------------------------------- Jeu de cartes */
 
-.deck-title { margin-bottom: 10px; }
+.deck-head { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; margin-bottom: 10px; }
+
+.role-switch { display: inline-flex; padding: 3px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); }
+.role-option {
+  border: 0; background: transparent; cursor: pointer;
+  padding: 6px 14px; border-radius: 999px;
+  font-size: 0.925rem; font-weight: 650; color: var(--muted);
+}
+.role-option[aria-checked="true"] { background: var(--accent); color: var(--accent-text); }
+
+.observer-note {
+  margin: 0;
+  padding: 28px 16px;
+  border: 1.5px dashed var(--border);
+  border-radius: 12px;
+  text-align: center;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.participant-tag {
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
 .deck {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

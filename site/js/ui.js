@@ -1,9 +1,17 @@
 // Interface de la salle. Reçoit un « store » (Firebase en production, factice pour les essais)
 // et ne contient aucune règle métier : tout calcul passe par poker-core.js.
 
-import { CARDS, MESSAGES, validatePseudo, buildRoomView, cardByValue, HEARTBEAT_MS, SWEEP_MS } from './poker-core.js?v=__VERSION__';
+import { CARDS, MESSAGES, validatePseudo, buildRoomView, cardByValue, voteCountLabel, HEARTBEAT_MS, SWEEP_MS } from './poker-core.js?v=__VERSION__';
 
 const PSEUDO_STORAGE_KEY = 'poker-planning.pseudo';
+const ROLE_STORAGE_KEY = 'poker-planning.role';
+
+function readStoredRole() {
+  try { return localStorage.getItem(ROLE_STORAGE_KEY) === 'observer' ? 'observer' : 'voter'; } catch { return 'voter'; }
+}
+function storeRole(role) {
+  try { localStorage.setItem(ROLE_STORAGE_KEY, role); } catch { /* stockage indisponible */ }
+}
 
 const $ = (id) => document.getElementById(id);
 
@@ -101,6 +109,7 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
     } else {
       if (!(await store.claimPseudo(checked.pseudo))) return MESSAGES.pseudoTaken;
       await store.enter(checked.pseudo);
+      await store.setObserver(readStoredRole() === 'observer');
     }
     pseudo = checked.pseudo;
     storePseudo(pseudo);
@@ -236,6 +245,14 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
     deck.append(button);
   }
 
+  for (const [id, role] of [['role-voter', 'voter'], ['role-observer', 'observer']]) {
+    $(id).addEventListener('click', () => {
+      if (!view || (role === 'observer') === Boolean(view.me?.observer)) return;
+      storeRole(role);
+      store.setObserver(role === 'observer');
+    });
+  }
+
   $('reveal').addEventListener('click', () => view?.canReveal && store.reveal(view.round));
   $('new-round').addEventListener('click', () => view && store.newRound(view.round));
 
@@ -265,6 +282,14 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
         you.textContent = '(vous)';
         name.append(you);
       }
+      if (p.observer) {
+        const tag = document.createElement('span');
+        tag.className = 'participant-tag';
+        tag.textContent = 'observateur';
+        name.append(tag);
+        item.append(name);
+        return item;
+      }
       const mini = document.createElement('span');
       mini.className = 'mini-card';
       if (view.revealed && p.vote !== null) {
@@ -289,8 +314,14 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
       return item;
     }));
 
-    const total = view.participants.length;
-    $('vote-count').textContent = `${view.voteCount} / ${total} ${view.voteCount > 1 ? 'votes' : 'vote'}`;
+    $('vote-count').textContent = voteCountLabel(view);
+
+    // Rôle
+    const observing = Boolean(view.me?.observer);
+    $('role-voter').setAttribute('aria-checked', String(!observing));
+    $('role-observer').setAttribute('aria-checked', String(observing));
+    deck.hidden = observing;
+    $('observer-note').hidden = !observing;
 
     // Cartes
     for (const button of deck.children) {
@@ -298,7 +329,7 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
       button.setAttribute('aria-pressed', String(selected));
       button.disabled = !view.canVote;
     }
-    $('deck-hint').textContent = view.revealed
+    $('deck-hint').textContent = observing ? '' : view.revealed
       ? 'Cartes révélées : votes figés jusqu\'au prochain « Nouveau vote ».'
       : view.myVote !== null ? 'Recliquez sur votre carte pour retirer votre vote.' : '';
 
