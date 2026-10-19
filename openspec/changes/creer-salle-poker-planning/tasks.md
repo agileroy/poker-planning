@@ -6,7 +6,7 @@
 
 ## 2. Firebase
 
-- [ ] 2.1 Guider l'auteur pour créer le projet Firebase (Realtime Database en `europe-west1`, authentification anonyme, domaines autorisés) et récupérer la configuration web dans `site/js/firebase-config.js`. Vérification : connexion anonyme réussie depuis `localhost`.
+- [x] 2.1 Guider l'auteur pour créer le projet Firebase (Realtime Database en `europe-west1`, authentification anonyme, domaines autorisés) et récupérer la configuration web dans `site/js/firebase-config.js`. Vérification : connexion anonyme réussie depuis `localhost`.
 - [ ] 2.2 Écrire `database.rules.json` : lecture de `/room` pour les participants authentifiés ; écriture de sa seule présence, de son seul vote (valeur du jeu, tour courant, pas après révélation) et de la réservation de pseudo libre ou à soi ; `state` modifiable seulement en `revealed: true` ou en tour suivant avec `revealed: false` ; suppression de tout `votes` autorisée uniquement dans la même mise à jour que le passage au tour suivant. Vérification : essais refusés dans le simulateur de règles de la console (vote d'un autre, vote après révélation, vote d'un tour périmé, valeur « 13 », pseudo d'un autre, suppression de `votes` sans changement de tour), et essai accepté du « Nouveau vote » complet.
 - [ ] 2.3 Créer `site/js/room-store.js` : chargement du SDK épinglé, connexion anonyme, présence par connexion avec `onDisconnect`, réservation et changement de pseudo par transaction, vote, retrait, révélation, nouveau vote (mise à jour multi-chemins atomique qui efface `votes` et passe au tour suivant ; refus ignoré si un autre l'a déjà fait), abonnement à l'état de la salle et à l'état de connexion. Vérification : parcours de la liste de contrôle 4.1 en local.
 
