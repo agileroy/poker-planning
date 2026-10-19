@@ -161,6 +161,50 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
     document.addEventListener(type, heartbeat, { passive: true });
   }
 
+  // ---------------------------------------------------------------- Rejoindre avec un téléphone
+
+  const joinUrl = location.origin + location.pathname;            // sans paramètre ni ancre
+  const joinLabel = joinUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  $('join-url').textContent = joinLabel;
+  $('qr-dialog-url').textContent = joinLabel;
+
+  const qrSvg = (() => {
+    try {
+      const qr = window.qrcode(0, 'M');
+      qr.addData(joinUrl);
+      qr.make();
+      return qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true, alt: `QR code : ${joinLabel}` });
+    } catch {
+      return null;                       // bibliothèque indisponible : pas de carte QR code
+    }
+  })();
+  if (qrSvg) {
+    $('qr-small').innerHTML = qrSvg;
+    $('qr-large').innerHTML = qrSvg;
+    $('join-card').hidden = false;
+  }
+
+  const dialog = $('qr-dialog');
+  $('qr-open').addEventListener('click', () => dialog.showModal());
+  $('qr-close').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+
+  $('share-link').addEventListener('click', async () => {
+    const status = $('share-status');
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Poker planning', url: joinUrl }); return; } catch (error) {
+        if (error?.name === 'AbortError') return;      // partage annulé par l'utilisateur
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(joinUrl);
+      status.textContent = 'Lien copié';
+    } catch {
+      status.textContent = joinLabel;                  // dernier recours : afficher l'adresse
+    }
+    setTimeout(() => { status.textContent = ''; }, 4000);
+  });
+
   $('leave').addEventListener('click', async () => {
     const leaving = pseudo;
     showLeft('Vous avez quitté la salle');

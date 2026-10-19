@@ -8,8 +8,9 @@ context: |
   Les votes d'un participant ne doivent jamais être visibles des autres avant la révélation.
   Hébergement : site statique sur GitHub Pages (https://vinchou59.github.io/poker-planning/), sans serveur à maintenir.
   Temps réel : Firebase (offre gratuite) partage l'état des salles entre les navigateurs ;
-  aucun autre service tiers. Des participants se connectent via un VPN d'entreprise : n'utiliser que HTTPS (port 443),
-  pas de connexion directe entre navigateurs (WebRTC).
+  aucun autre service tiers. N'utiliser que HTTPS (port 443), pas de connexion directe entre navigateurs (WebRTC).
+  Le VPN de l'entreprise (proxy Zscaler) bloque GitHub Pages et Firebase : les participants rejoignent depuis
+  leur téléphone, via le QR code affiché dans la salle.
   Stack : HTML/CSS/JavaScript vanilla en modules ES, sans framework ni étape de build (dossier site/), comme prepare-certification.
   Architecture : site/js/poker-core.js contient la logique métier pure (sans DOM ni Firebase) ;
   site/js/room-store.js est le seul module qui parle à Firebase ; site/js/ui.js gère l'interface.

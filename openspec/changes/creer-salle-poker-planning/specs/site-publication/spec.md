@@ -30,7 +30,7 @@ Par défaut, le thème SHALL suivre le réglage du système. Un bouton, visible 
 - **THEN** la page s'affiche directement en thème sombre
 
 ### Requirement: Connexion au service temps réel
-Le site SHALL n'utiliser que des connexions HTTPS vers Firebase, compatibles avec un VPN d'entreprise. Si le service temps réel est injoignable ou que la connexion est perdue, la salle SHALL afficher un message « Connexion perdue, reconnexion… » et reprendre automatiquement à son retour, sans recharger la page.
+Le site SHALL n'utiliser que des connexions HTTPS (port 443) vers Firebase. Si le service temps réel est injoignable ou que la connexion est perdue, la salle SHALL afficher un message « Connexion perdue, reconnexion… » et reprendre automatiquement à son retour, sans recharger la page.
 
 #### Scenario: Coupure réseau
 - **GIVEN** un participant dans la salle

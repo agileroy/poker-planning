@@ -18,6 +18,7 @@
     })();
   </script>
   <link rel="stylesheet" href="app.css?v=__VERSION__">
+  <script defer src="vendor/qrcode-generator-1.4.4.js?v=__VERSION__"></script>
   <script type="module" src="js/theme.js?v=__VERSION__"></script>
   <script type="module" src="js/app.js?v=__VERSION__"></script>
 </head>
@@ -80,23 +81,40 @@
           <button type="button" class="button button-primary" id="reveal">Révéler</button>
           <button type="button" class="button button-ghost" id="new-round">Nouveau vote</button>
         </div>
+        <div class="share-row">
+          <button type="button" class="link-button" id="share-link">Partager le lien</button>
+          <span class="share-status" id="share-status" role="status" aria-live="polite"></span>
+        </div>
       </section>
 
-      <section class="panel results" id="results" aria-labelledby="results-title" hidden>
-        <h2 id="results-title">Résultats</h2>
-        <div class="results-grid">
-          <div class="stat">
-            <span class="stat-label">Moyenne</span>
-            <span class="stat-value" id="mean"></span>
+      <div class="side">
+        <section class="panel join-card" id="join-card" aria-labelledby="join-title" hidden>
+          <button type="button" class="qr-button" id="qr-open" aria-label="Agrandir le QR code" title="Agrandir">
+            <span class="qr" id="qr-small"></span>
+          </button>
+          <div class="join-text">
+            <h2 id="join-title">Rejoindre avec un téléphone</h2>
+            <p class="join-hint">Scannez le QR code, ou ouvrez&nbsp;:</p>
+            <p class="join-url" id="join-url"></p>
           </div>
-          <div class="stat stat-wide">
-            <span class="stat-label">Répartition</span>
-            <ul class="distribution" id="distribution"></ul>
+        </section>
+
+        <section class="panel results" id="results" aria-labelledby="results-title" hidden>
+          <h2 id="results-title">Résultats</h2>
+          <div class="results-grid">
+            <div class="stat">
+              <span class="stat-label">Moyenne</span>
+              <span class="stat-value" id="mean"></span>
+            </div>
+            <div class="stat stat-wide">
+              <span class="stat-label">Répartition</span>
+              <ul class="distribution" id="distribution"></ul>
+            </div>
           </div>
-        </div>
-        <p class="notice notice-success" id="consensus" hidden></p>
-        <p class="notice notice-warning" id="scissors-alert" hidden></p>
-      </section>
+          <p class="notice notice-success" id="consensus" hidden></p>
+          <p class="notice notice-warning" id="scissors-alert" hidden></p>
+        </section>
+      </div>
 
       <section class="deck-panel" aria-labelledby="deck-title">
         <h2 id="deck-title" class="deck-title">Votre carte</h2>
@@ -105,5 +123,12 @@
       </section>
     </section>
   </main>
+
+  <dialog class="qr-dialog" id="qr-dialog" aria-labelledby="qr-dialog-title">
+    <h2 id="qr-dialog-title">Rejoindre avec un téléphone</h2>
+    <div class="qr qr-large" id="qr-large"></div>
+    <p class="join-url" id="qr-dialog-url"></p>
+    <button type="button" class="button button-primary" id="qr-close">Fermer</button>
+  </dialog>
 </body>
 </html>

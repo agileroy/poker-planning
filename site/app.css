@@ -198,6 +198,51 @@ main { max-width: 960px; margin: 0 auto; padding: 0 16px 32px; }
   .deck-panel { grid-column: 1 / -1; }
 }
 
+.side { display: grid; gap: 16px; align-content: start; }
+
+/* ---------------------------------------------------------------- Rejoindre (QR code) */
+
+.join-card { display: flex; align-items: center; gap: 16px; }
+.join-text { min-width: 0; }
+.join-hint { margin: 4px 0 2px; color: var(--muted); font-size: 0.925rem; }
+.join-url { margin: 0; font-weight: 650; overflow-wrap: anywhere; }
+
+.qr { display: block; background: #fff; border-radius: 8px; padding: 6px; line-height: 0; }
+.qr svg { display: block; width: 100%; height: auto; }
+.qr-button {
+  flex: none;
+  width: 120px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  cursor: zoom-in;
+}
+.qr-button:hover { border-color: var(--accent); }
+
+.qr-dialog {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  padding: 24px;
+  width: min(90vw, 520px);
+  text-align: center;
+  box-shadow: 0 20px 60px rgb(0 0 0 / 0.35);
+}
+.qr-dialog::backdrop { background: rgb(0 0 0 / 0.55); }
+.qr-dialog h2 { font-size: 1.2rem; margin-bottom: 16px; }
+.qr-large { width: min(70vw, 70vh, 420px); margin: 0 auto 12px; padding: 14px; }
+.qr-dialog .join-url { margin-bottom: 18px; }
+
+.share-row { margin-top: 12px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.share-row .link-button { font-size: 0.925rem; }
+.share-status { color: var(--muted); font-size: 0.925rem; }
+
+/* Écran étroit : pas de QR code, partage du lien. Écran large : QR code, pas de bouton de partage. */
+@media (max-width: 759px) { .join-card { display: none !important; } }
+@media (min-width: 760px) { .share-row { display: none; } }
+
 .panel {
   background: var(--surface);
   border: 1px solid var(--border);

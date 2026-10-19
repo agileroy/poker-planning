@@ -9,11 +9,17 @@ Cartes : `?` · `0` · `1` · `2` · `3` · `5` · `8` · ✂️ (ciseaux : stor
 ## Fonctionnement
 
 - Une **salle unique** pour toute l'équipe : on ouvre le lien, on choisit un pseudo, on est dans la salle. Pas de compte.
+- Sur ordinateur, un **QR code** permet de rejoindre depuis un téléphone (clic pour l'agrandir) ; sur téléphone, **Partager le lien**.
 - Le pseudo est **unique** dans la salle et **mémorisé** dans le navigateur ; « Changer de pseudo » permet d'en changer.
 - La liste des **présents** se met à jour en temps réel.
 - Les votes des autres restent **cachés** (carte de dos) jusqu'à ce que quelqu'un clique sur **Révéler**. On peut changer ou retirer son vote jusque-là ; après, les votes sont figés.
 - **Nouveau vote** efface tous les votes et recommence un tour, pour tout le monde.
+- **Quitter** retire de la salle ; les participants inactifs depuis plus de 20 minutes (onglet oublié) sont retirés automatiquement.
 - Après la révélation : répartition, moyenne (sans `?` ni ✂️), consensus quand tout le monde a la même carte, alerte « Story à découper ? » si une carte ✂️ a été jouée.
+
+## Réseau d'entreprise
+
+Le VPN de l'entreprise (proxy Zscaler) bloque GitHub Pages et Firebase : rejoindre la salle depuis un téléphone, hors VPN.
 
 ## Architecture
 
@@ -23,6 +29,7 @@ Site statique (HTML/CSS/JavaScript, sans build) publié sur GitHub Pages ; l'ét
 - `site/js/room-store.js` : seul module qui parle à Firebase ;
 - `site/js/ui.js` : interface ; `site/js/app.js` : point d'entrée ;
 - `site/js/firebase-config.js` : configuration web Firebase (publique par nature) ;
+- `site/vendor/` : générateur de QR code `qrcode-generator` 1.4.4 (licence MIT) ;
 - `database.rules.json` : règles de sécurité de la base, à publier dans la console Firebase après chaque modification.
 
 ## Développement

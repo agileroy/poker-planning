@@ -8,6 +8,24 @@ Le site SHALL proposer une seule salle de poker planning, commune à tous les pa
 - **WHEN** elles ont choisi leur pseudo
 - **THEN** elles se retrouvent dans la même salle et se voient mutuellement dans la liste des présents
 
+### Requirement: Rejoindre avec un téléphone
+Sur un écran large (760 px et plus), la salle SHALL afficher en permanence une carte « Rejoindre avec un téléphone » avec un QR code de l'adresse du site (sans paramètre ni ancre) et l'adresse en clair, sans gêner la liste des présents, les cartes ni les résultats. Un clic sur le QR code SHALL l'afficher en grand au centre de l'écran ; la touche Échap, un clic en dehors ou un bouton « Fermer » SHALL le refermer. Le QR code SHALL rester lisible en thème sombre (modules sombres sur fond clair). Sur un écran étroit, le QR code MUST NOT être affiché ; un bouton « Partager le lien » SHALL ouvrir le partage du téléphone, ou à défaut copier l'adresse et le confirmer. Le générateur de QR code SHALL être embarqué dans le site, sans chargement depuis un service externe.
+
+#### Scenario: Retardataire en réunion
+- **GIVEN** l'animateur qui partage son écran d'ordinateur, salle ouverte
+- **WHEN** un retardataire scanne le QR code de la carte « Rejoindre avec un téléphone »
+- **THEN** son téléphone ouvre l'adresse du site et il peut choisir son pseudo
+
+#### Scenario: QR code agrandi
+- **GIVEN** la salle sur un ordinateur
+- **WHEN** l'utilisateur clique sur le QR code, puis appuie sur Échap
+- **THEN** le QR code s'affiche en grand au centre de l'écran, puis se referme
+
+#### Scenario: Sur téléphone
+- **GIVEN** la salle sur un téléphone de 390 px de large
+- **WHEN** elle s'affiche
+- **THEN** aucun QR code n'est visible, et un bouton « Partager le lien » est proposé
+
 ### Requirement: Choix du pseudo
 À sa première arrivée, le participant SHALL choisir un pseudo avant d'entrer dans la salle. Le pseudo SHALL être débarrassé de ses espaces de début et de fin, et compter de 1 à 20 caractères. Un pseudo vide ou trop long MUST être refusé avec un message qui explique la règle.
 
