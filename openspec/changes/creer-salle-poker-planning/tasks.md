@@ -1,8 +1,8 @@
 ## 1. Logique métier pure
 
-- [ ] 1.1 Créer `site/js/poker-core.js` : jeu de cartes, validation et normalisation du pseudo (1 à 20 caractères, clé insensible à la casse et aux espaces de bord, caractères interdits par Firebase encodés). Vérification : `tests/poker-core.test.mjs` couvre pseudo vide, trop long, « Julie » et « julie » de même clé.
-- [ ] 1.2 Ajouter la vue de la salle : à partir de l'état brut (`state`, `participants`, `votes`) et de l'`uid` courant, produire la liste triée des présents avec « vous », l'indicateur « a voté » (vote du tour courant uniquement), la valeur visible seulement après révélation, et l'état du bouton « Révéler ». Vérification : tests pour un vote d'un ancien tour ignoré, un absent non compté, aucune valeur exposée avant révélation.
-- [ ] 1.3 Ajouter le calcul des résultats : répartition dans l'ordre du jeu, moyenne formatée en français, consensus, alerte ciseaux. Vérification : un test par scénario de la spec `vote-results`.
+- [x] 1.1 Créer `site/js/poker-core.js` : jeu de cartes, validation et normalisation du pseudo (1 à 20 caractères, clé insensible à la casse et aux espaces de bord, caractères interdits par Firebase encodés). Vérification : `tests/poker-core.test.mjs` couvre pseudo vide, trop long, « Julie » et « julie » de même clé.
+- [x] 1.2 Ajouter la vue de la salle : à partir de l'état brut (`state`, `participants`, `votes`) et de l'`uid` courant, produire la liste triée des présents avec « vous », l'indicateur « a voté » (vote du tour courant uniquement), la valeur visible seulement après révélation, et l'état du bouton « Révéler ». Vérification : tests pour un vote d'un ancien tour ignoré, un absent non compté, aucune valeur exposée avant révélation.
+- [x] 1.3 Ajouter le calcul des résultats : répartition dans l'ordre du jeu, moyenne formatée en français, consensus, alerte ciseaux. Vérification : un test par scénario de la spec `vote-results`.
 
 ## 2. Firebase
 
@@ -12,12 +12,12 @@
 
 ## 3. Interface
 
-- [ ] 3.1 Créer `site/index.html`, `site/app.css` et `site/js/app.js` : écran du pseudo (saut automatique si pseudo mémorisé et libre, erreurs de la spec), salle avec liste des présents et cartes de dos, jeu de cartes avec sélection et retrait, boutons « Révéler » et « Nouveau vote », « Changer de pseudo », résultats, bandeau « Connexion perdue, reconnexion… ». Vérification : liste de contrôle 4.1.
-- [ ] 3.2 Dessiner l'icône ciseaux en SVG (`site/img/scissors.svg`) et le dos de carte. Vérification : rendu net en thème clair et sombre, texte alternatif présent.
-- [ ] 3.3 Vérifier l'affichage sur téléphone (390 px) et en thème sombre. Vérification : captures sans défilement horizontal.
+- [x] 3.1 Créer `site/index.html`, `site/app.css` et `site/js/app.js` : écran du pseudo (saut automatique si pseudo mémorisé et libre, erreurs de la spec), salle avec liste des présents et cartes de dos, jeu de cartes avec sélection et retrait, boutons « Révéler » et « Nouveau vote », « Changer de pseudo », résultats, bandeau « Connexion perdue, reconnexion… ». Vérification : liste de contrôle 4.1.
+- [x] 3.2 Dessiner l'icône ciseaux en SVG (`site/img/scissors.svg`) et le dos de carte. Vérification : rendu net en thème clair et sombre, texte alternatif présent.
+- [x] 3.3 Vérifier l'affichage sur téléphone (390 px) et en thème sombre. Vérification : captures sans défilement horizontal.
 
 ## 4. Vérification et publication
 
 - [ ] 4.1 Liste de contrôle à deux navigateurs (dont une fenêtre privée), en local : arrivée et pseudo, pseudo pris, pseudo mémorisé, changement de pseudo, liste en temps réel à l'arrivée et au départ, vote caché, changement et retrait de vote, révélation, vote figé, nouveau vote (votes effacés dans la console Firebase, y compris celui d'un participant parti), départ avant révélation, rechargement pendant un vote, deux onglets du même navigateur, coupure réseau. Vérification : chaque point constaté.
-- [ ] 4.2 Ajouter `.github/workflows/pages.yml` (tests puis publication de `site/`), mettre à jour `README.md` et le contexte de `openspec/config.yaml`. Vérification : `npm test` au vert en local.
+- [x] 4.2 Ajouter `.github/workflows/pages.yml` (tests puis publication de `site/`), mettre à jour `README.md` et le contexte de `openspec/config.yaml`. Vérification : `npm test` au vert en local.
 - [ ] 4.3 Guider l'auteur pour publier les règles Firebase et activer GitHub Pages (source : GitHub Actions), puis vérifier le site publié et un essai depuis le VPN d'entreprise. Vérification : deux participants votent et révèlent sur https://vinchou59.github.io/poker-planning/.

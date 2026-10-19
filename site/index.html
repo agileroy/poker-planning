@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Poker planning</title>
+  <meta name="description" content="Poker planning de l'équipe, sans publicité.">
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="app.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="brand"><span class="brand-card" aria-hidden="true"></span>Poker planning</h1>
+    <div class="me" id="me" hidden>
+      <span class="me-name" id="me-name"></span>
+      <button type="button" class="link-button" id="change-pseudo">Changer de pseudo</button>
+    </div>
+  </header>
+
+  <div class="banner" id="banner" role="status" hidden></div>
+
+  <main>
+    <!-- Chargement / erreur bloquante -->
+    <section class="screen" id="screen-status">
+      <p class="status-text" id="status-text">Connexion…</p>
+    </section>
+
+    <!-- Choix du pseudo -->
+    <section class="screen" id="screen-pseudo" hidden>
+      <form class="pseudo-form" id="pseudo-form" novalidate>
+        <h2>Bienvenue !</h2>
+        <label for="pseudo-input">Votre pseudo</label>
+        <input id="pseudo-input" name="pseudo" autocomplete="nickname" autocapitalize="words" spellcheck="false" maxlength="40" required>
+        <p class="error" id="pseudo-error" role="alert" aria-live="assertive"></p>
+        <div class="form-actions">
+          <button type="button" class="button button-ghost" id="pseudo-cancel" hidden>Annuler</button>
+          <button type="submit" class="button button-primary" id="pseudo-submit">Entrer dans la salle</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Salle -->
+    <section class="screen room" id="screen-room" hidden>
+      <section class="panel participants-panel" aria-labelledby="participants-title">
+        <div class="panel-head">
+          <h2 id="participants-title">Présents</h2>
+          <span class="count" id="vote-count"></span>
+        </div>
+        <ul class="participants" id="participants"></ul>
+        <div class="actions">
+          <button type="button" class="button button-primary" id="reveal">Révéler</button>
+          <button type="button" class="button button-ghost" id="new-round">Nouveau vote</button>
+        </div>
+      </section>
+
+      <section class="panel results" id="results" aria-labelledby="results-title" hidden>
+        <h2 id="results-title">Résultats</h2>
+        <div class="results-grid">
+          <div class="stat">
+            <span class="stat-label">Moyenne</span>
+            <span class="stat-value" id="mean"></span>
+          </div>
+          <div class="stat stat-wide">
+            <span class="stat-label">Répartition</span>
+            <ul class="distribution" id="distribution"></ul>
+          </div>
+        </div>
+        <p class="notice notice-success" id="consensus" hidden></p>
+        <p class="notice notice-warning" id="scissors-alert" hidden></p>
+      </section>
+
+      <section class="deck-panel" aria-labelledby="deck-title">
+        <h2 id="deck-title" class="deck-title">Votre carte</h2>
+        <div class="deck" id="deck" role="group" aria-labelledby="deck-title"></div>
+        <p class="hint" id="deck-hint"></p>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

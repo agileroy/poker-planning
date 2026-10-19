@@ -11,11 +11,12 @@ context: |
   aucun autre service tiers. Des participants se connectent via un VPN d'entreprise : n'utiliser que HTTPS (port 443),
   pas de connexion directe entre navigateurs (WebRTC).
   Stack : HTML/CSS/JavaScript vanilla en modules ES, sans framework ni étape de build (dossier site/), comme prepare-certification.
-  Séparer la logique métier pure (testable sans DOM ni Firebase) de l'interface et de l'accès à Firebase.
+  Architecture : site/js/poker-core.js contient la logique métier pure (sans DOM ni Firebase) ;
+  site/js/room-store.js est le seul module qui parle à Firebase ; site/js/ui.js gère l'interface.
+  Les règles de sécurité Firebase (database.rules.json) doivent appliquer les mêmes contraintes que l'interface.
+  Salle unique, sans compte : pseudo unique et mémorisé dans le navigateur ; interface en français.
   Tests : lanceur intégré de Node.js (npm test), à faire évoluer avec chaque changement de comportement ;
   la publication GitHub Actions est bloquée si un test échoue.
-  À PRÉCISER (cadrage en cours) : accès aux salles, rôles (animateur, observateur),
-  règles de révélation et de résultats, langue de l'interface.
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.

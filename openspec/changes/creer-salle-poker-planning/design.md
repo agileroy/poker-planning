@@ -25,7 +25,7 @@ Dépôt neuf. L'auteur a déjà publié `prepare-certification` en site statique
 
 - **Realtime Database plutôt que Firestore** : elle gère nativement la présence (`.info/connected` et `onDisconnect`), qui est le cœur de la liste des présents, et passe par WebSocket ou, à défaut, par requêtes HTTPS longues : compatible VPN. Région `europe-west1`.
 
-- **SDK Firebase** : modules ES officiels chargés depuis `https://www.gstatic.com/firebasejs/<version>/…`, version épinglée à la dernière version stable au moment de l'implémentation. Pas de dépendance npm.
+- **SDK Firebase** : modules ES officiels chargés depuis `https://www.gstatic.com/firebasejs/12.19.0/…`. La 13.0.0, sortie le 7 octobre 2026, est une version majeure trop récente : on reste sur la dernière 12.x et on montera de version dans un changement séparé. Pas de dépendance npm.
 
 - **Identité** : authentification anonyme Firebase. Chaque navigateur reçoit un identifiant stable (`uid`), conservé par le SDK : rechargements et onglets multiples gardent la même identité. Le pseudo est mémorisé dans `localStorage` (lecture et écriture protégées par try/catch).
 
@@ -35,7 +35,7 @@ Dépôt neuf. L'auteur a déjà publié `prepare-certification` en site statique
   - `pseudos/{cléNormalisée}` : `uid` du titulaire, pour garantir l'unicité ;
   - `votes/{uid}` : `{ value, round }`.
 
-- **Unicité du pseudo** : réservation par transaction sur `pseudos/{clé}` (clé = pseudo en minuscules, sans espaces de bord, caractères interdits par Firebase `.#$[]/` encodés). La réservation réussit si la clé est libre ou déjà à soi ; elle est libérée par `onDisconnect` et lors d'un changement de pseudo. Les règles interdisent d'écraser la réservation d'un autre.
+- **Unicité du pseudo** : réservation par transaction sur `pseudos/{clé}` (clé = pseudo en minuscules, sans espaces de bord, caractères interdits par Firebase `.#$[]/` encodés). La réservation réussit si la clé est libre, déjà à soi, ou détenue par un participant qui n'est plus présent (aucune connexion) ; elle est libérée lors d'un changement de pseudo. Elle n'est pas libérée par `onDisconnect`, car fermer un onglet sur deux libérerait le pseudo d'un participant toujours présent. Les règles interdisent d'écraser la réservation d'un participant présent.
 
 - **Nouveau vote = effacement réel et atomique** : « Nouveau vote » envoie une seule mise à jour multi-chemins qui, en même temps, supprime tout le nœud `votes`, incrémente `state.round` et remet `revealed` à `false`. Firebase applique ces écritures ensemble ou pas du tout : tous les participants voient la salle vide au même instant, et plus aucun vote de l'ancien tour ne reste dans la base. Les règles n'autorisent la suppression de `votes` en entier que dans cette mise à jour précise (le nouveau `state.round` doit valoir l'ancien + 1 et `revealed` repasser à `false`) ; en dehors de ce cas, chacun ne peut toujours écrire que son propre vote. Le numéro de tour reste stocké avec chaque vote : un vote envoyé de l'ancien tour à la dernière milliseconde est refusé par les règles au lieu de réapparaître dans le nouveau tour. Deux clics simultanés sur « Nouveau vote » : le second est refusé par les règles (son numéro de tour est périmé) et l'interface l'ignore, la salle étant déjà remise à zéro. Alternative écartée : laisser les anciens votes en base et les ignorer par numéro de tour ; le résultat affiché était le même, mais les votes n'étaient pas réellement effacés.
 
