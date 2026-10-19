@@ -16,10 +16,14 @@ export const CARDS = Object.freeze([
 export const CARD_VALUES = Object.freeze(CARDS.map((card) => card.value));
 export const SCISSORS = 'scissors';
 export const PSEUDO_MAX_LENGTH = 20;
+/** Délai au-delà duquel un participant sans action est inactif (même valeur dans database.rules.json). */
+export const INACTIVITY_MS = 20 * 60 * 1000;
 
 export const MESSAGES = Object.freeze({
   pseudoLength: `Choisissez un pseudo de 1 à ${PSEUDO_MAX_LENGTH} caractères`,
   pseudoTaken: 'Ce pseudo est déjà utilisé, choisissez-en un autre',
+  noInactive: 'Aucun participant inactif depuis plus de 20 minutes.',
+  kicked: 'Vous avez été retiré de la salle pour inactivité',
 });
 
 export function isValidCard(value) {
@@ -87,8 +91,9 @@ function isPresent(participant) {
  *
  * @param {{state?: object, participants?: object, votes?: object}} raw contenu de /room
  * @param {string} myUid identifiant du participant courant
+ * @param {number} [now] heure actuelle selon le serveur (ms), pour l'inactivité
  */
-export function buildRoomView(raw, myUid) {
+export function buildRoomView(raw, myUid, now = Date.now()) {
   const state = raw?.state ?? {};
   const round = Number.isInteger(state.round) ? state.round : 0;
   const revealed = state.revealed === true;
@@ -110,6 +115,7 @@ export function buildRoomView(raw, myUid) {
         isMe,
         hasVoted: value !== null,
         vote: revealed || isMe ? value : null,
+        inactive: !isMe && isInactive(participant, now),
       };
     })
     .sort((a, b) => a.pseudo.localeCompare(b.pseudo, 'fr', { sensitivity: 'base' }) || a.uid.localeCompare(b.uid));
@@ -124,10 +130,26 @@ export function buildRoomView(raw, myUid) {
     me,
     myVote: me ? me.vote : voteOf(myUid),
     voteCount: voters.length,
+    inactive: participants.filter((p) => p.inactive),
     canVote: !revealed,
     canReveal: !revealed && voters.length > 0,
     results: revealed ? computeResults(voters.map((p) => p.vote)) : null,
   };
+}
+
+// ---------------------------------------------------------------- Inactivité
+
+/** Inactif : aucune action depuis plus de INACTIVITY_MS (ou heure inconnue). */
+export function isInactive(participant, now) {
+  const last = participant?.lastActive;
+  return typeof last !== 'number' || now - last > INACTIVITY_MS;
+}
+
+const listFormatter = new Intl.ListFormat('fr', { style: 'long', type: 'conjunction' });
+
+/** Question de confirmation qui nomme les participants à retirer. */
+export function confirmRemovalMessage(pseudos) {
+  return `Retirer de la salle les participants inactifs depuis plus de 20 minutes : ${listFormatter.format(pseudos)} ?`;
 }
 
 // ---------------------------------------------------------------- Résultats

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   CARDS, MESSAGES, validatePseudo, pseudoKey, isNumericCard,
   buildRoomView, computeResults, formatMean, newRoundUpdate,
+  INACTIVITY_MS, isInactive, confirmRemovalMessage,
 } from '../site/js/poker-core.js';
 
 const here = { c1: true };
@@ -186,4 +187,35 @@ test('pas de consensus pour un seul votant, ni sur ? ou ciseaux', () => {
 test('alerte ciseaux : nombre de cartes ciseaux jouées', () => {
   assert.equal(computeResults(['5', '8', 'scissors']).scissorsCount, 1);
   assert.equal(computeResults(['5', '8']).scissorsCount, 0);
+});
+
+// ---------------------------------------------------------------- Inactivité
+
+const NOW = 1_800_000_000_000;
+const MIN = 60 * 1000;
+
+test('inactif au-delà de 20 minutes sans action, actif en deçà', () => {
+  assert.equal(INACTIVITY_MS, 20 * MIN);
+  assert.equal(isInactive({ lastActive: NOW - 25 * MIN }, NOW), true);
+  assert.equal(isInactive({ lastActive: NOW - 19 * MIN }, NOW), false);
+  assert.equal(isInactive({ lastActive: NOW - 20 * MIN }, NOW), false, 'exactement 20 minutes : encore actif');
+  assert.equal(isInactive({}, NOW), true, 'heure inconnue : inactif');
+});
+
+test('mention « inactif » dans la vue, jamais pour soi-même', () => {
+  const view = buildRoomView({
+    state: { round: 0, revealed: false },
+    participants: {
+      uJulie: { pseudo: 'Julie', connections: here, lastActive: NOW - 2 * 60 * MIN },
+      uMarc: { pseudo: 'Marc', connections: here, lastActive: NOW - MIN },
+      uPaul: { pseudo: 'Paul', connections: here, lastActive: NOW - 120 * MIN },
+    },
+  }, 'uJulie', NOW);
+  assert.deepEqual(view.participants.map((p) => [p.pseudo, p.inactive]), [['Julie', false], ['Marc', false], ['Paul', true]]);
+  assert.deepEqual(view.inactive.map((p) => p.pseudo), ['Paul']);
+});
+
+test('confirmation qui nomme les participants à retirer', () => {
+  assert.equal(confirmRemovalMessage(['Paul']), 'Retirer de la salle les participants inactifs depuis plus de 20 minutes : Paul ?');
+  assert.equal(confirmRemovalMessage(['Julie', 'Paul']), 'Retirer de la salle les participants inactifs depuis plus de 20 minutes : Julie et Paul ?');
 });

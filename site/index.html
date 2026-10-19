@@ -62,7 +62,7 @@
     <!-- Après « Quitter », si le navigateur refuse de fermer l'onglet -->
     <section class="screen" id="screen-left" hidden>
       <div class="left-card">
-        <h2>Vous avez quitté la salle</h2>
+        <h2 id="left-title">Vous avez quitté la salle</h2>
         <p>Vous pouvez fermer cet onglet.</p>
         <button type="button" class="button button-primary" id="rejoin">Revenir dans la salle</button>
       </div>
@@ -79,6 +79,10 @@
         <div class="actions">
           <button type="button" class="button button-primary" id="reveal">Révéler</button>
           <button type="button" class="button button-ghost" id="new-round">Nouveau vote</button>
+        </div>
+        <div class="reset-row">
+          <button type="button" class="link-button" id="reset-participants">Réinitialiser les participants</button>
+          <p class="reset-message" id="reset-message" role="status" aria-live="polite"></p>
         </div>
       </section>
 

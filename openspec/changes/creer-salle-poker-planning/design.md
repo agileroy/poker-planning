@@ -43,6 +43,10 @@ Dépôt neuf. L'auteur a déjà publié `prepare-certification` en site statique
 
 - **Révélation et vote figé** : « Révéler » écrit `revealed = true`. Les règles refusent toute écriture dans `votes/{uid}` quand `state.revealed` est vrai, et refusent un `round` différent du tour courant ou une `value` hors du jeu de cartes. Une révélation concurrente de deux participants donne le même résultat.
 
+- **Quitter** : le participant supprime sa propre fiche `participants/{uid}` (tous ses onglets), son vote s'il n'est pas révélé et sa réservation de pseudo, annule ses `onDisconnect`, puis appelle `window.close()`, que le navigateur n'accepte que pour un onglet ouvert par un script ou sans historique ; sinon un écran « quitté » s'affiche.
+
+- **Activité et retrait des inactifs** : chaque action écrit `participants/{uid}/lastActive` avec l'heure du serveur (`serverTimestamp`, imposée par les règles : `newData.val() === now`). L'inactivité (plus de 20 minutes, constante `INACTIVITY_MS`) est jugée par l'interface avec l'heure du serveur estimée (`.info/serverTimeOffset`), et par les règles avec `now` : un participant ne peut supprimer la fiche d'un autre que si son `lastActive` date de plus de 20 minutes ou est absent. Le retiré, s'il a encore un onglet ouvert, voit sa fiche disparaître : il cesse de rouvrir sa présence et affiche l'écran « retiré pour inactivité ». Son pseudo redevient libre puisqu'il n'est plus présent ; son vote n'est plus compté. La confirmation utilise `window.confirm`, suffisante pour une action rare.
+
 - **Valeurs de carte** : chaînes `"?"`, `"0"`, `"1"`, `"2"`, `"3"`, `"5"`, `"8"`, `"scissors"`, définies une seule fois dans `poker-core.js` et reprises dans les règles.
 
 - **Format des nombres** : `Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 })` pour la moyenne.

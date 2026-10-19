@@ -26,7 +26,8 @@
 
       "participants": {
         "$uid": {
-          ".write": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && (auth.uid === $uid || (!newData.exists() && (!data.child('lastActive').exists() || data.child('lastActive').val() < now - 1200000)))",
+          "lastActive": { ".validate": "newData.isNumber() && newData.val() === now" },
           "pseudo": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40" },
           "connections": {
             "$connId": { ".validate": "newData.val() === true" }

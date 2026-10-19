@@ -1,7 +1,7 @@
 // Interface de la salle. Reçoit un « store » (Firebase en production, factice pour les essais)
 // et ne contient aucune règle métier : tout calcul passe par poker-core.js.
 
-import { CARDS, MESSAGES, validatePseudo, buildRoomView, cardByValue } from './poker-core.js?v=__VERSION__';
+import { CARDS, MESSAGES, validatePseudo, buildRoomView, cardByValue, confirmRemovalMessage } from './poker-core.js?v=__VERSION__';
 
 const PSEUDO_STORAGE_KEY = 'poker-planning.pseudo';
 
@@ -44,6 +44,7 @@ export async function startApp(store) {
   let view = null;
   let pseudo = null;          // pseudo actuel dans la salle (null tant qu'on n'y est pas)
   let everConnected = false;
+  let seenInRoom = false;     // vrai dès que sa fiche est apparue dans la salle
 
   // ---------------------------------------------------------------- Connexion
 
@@ -128,11 +129,45 @@ export async function startApp(store) {
     showScreen('room');
   });
 
+  function showLeft(title) {
+    pseudo = null;            // plus aucun rendu de la salle
+    seenInRoom = false;
+    $('me').hidden = true;
+    $('left-title').textContent = title;
+    showScreen('left');
+  }
+
+  function kicked() {
+    showLeft(MESSAGES.kicked);
+    store.stopPresence();
+  }
+
+  let resetTimer = null;
+  function resetMessage(text) {
+    $('reset-message').textContent = text;
+    clearTimeout(resetTimer);
+    if (text) resetTimer = setTimeout(() => { $('reset-message').textContent = ''; }, 6000);
+  }
+
+  $('reset-participants').addEventListener('click', async () => {
+    if (!view) return;
+    view = buildRoomView(raw, store.uid, store.serverNow());
+    const targets = view.inactive;
+    if (targets.length === 0) {
+      resetMessage(MESSAGES.noInactive);
+      return;
+    }
+    if (!window.confirm(confirmRemovalMessage(targets.map((p) => p.pseudo)))) return;
+    const removed = await store.removeParticipants(targets.map((p) => p.uid));
+    resetMessage(removed === 1 ? '1 participant retiré.' : `${removed} participants retirés.`);
+  });
+
+  // L'inactivité évolue avec le temps, même sans changement dans la salle.
+  setInterval(() => render(), 30 * 1000);
+
   $('leave').addEventListener('click', async () => {
     const leaving = pseudo;
-    pseudo = null;            // plus aucun rendu de la salle
-    $('me').hidden = true;
-    showScreen('left');
+    showLeft('Vous avez quitté la salle');
     await store.leave(leaving);
     // Accepté seulement si l'onglet a été ouvert par un script ; sinon l'écran « quitté » reste affiché.
     window.close();
@@ -168,7 +203,13 @@ export async function startApp(store) {
 
   function render() {
     if (!raw || pseudo === null) return;
-    view = buildRoomView(raw, store.uid);
+    // Retiré par un autre participant (inactivité) : sa fiche a disparu de la salle.
+    if (seenInRoom && !raw.participants?.[store.uid]) {
+      kicked();
+      return;
+    }
+    view = buildRoomView(raw, store.uid, store.serverNow());
+    if (view.me) seenInRoom = true;
 
     // Présents
     const list = $('participants');
@@ -178,6 +219,12 @@ export async function startApp(store) {
       const name = document.createElement('span');
       name.className = 'participant-name';
       name.textContent = p.pseudo;
+      if (p.inactive) {
+        const tag = document.createElement('span');
+        tag.className = 'participant-inactive';
+        tag.textContent = 'inactif';
+        name.append(tag);
+      }
       if (p.isMe) {
         const you = document.createElement('span');
         you.className = 'participant-you';

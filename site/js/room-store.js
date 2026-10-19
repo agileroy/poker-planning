@@ -4,7 +4,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 import {
-  getDatabase, ref, onValue, push, set, update, remove, onDisconnect, runTransaction,
+  getDatabase, ref, onValue, push, set, update, remove, onDisconnect, runTransaction, serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js';
 import { pseudoKey, newRoundUpdate } from './poker-core.js?v=__VERSION__';
 
@@ -27,6 +27,7 @@ export function createRoomStore(firebaseConfig) {
   let entered = false;
   let connected = false;
   const myConnections = [];
+  let serverOffset = 0;
 
   /** Connexion anonyme : l'identifiant est conservé par le navigateur (rechargements, onglets). */
   function start() {
@@ -35,6 +36,7 @@ export function createRoomStore(firebaseConfig) {
         if (user) {
           stop();
           uid = user.uid;
+          onValue(ref(db, '.info/serverTimeOffset'), (snap) => { serverOffset = snap.val() ?? 0; });
           resolve(uid);
         }
       }, reject);
@@ -67,6 +69,16 @@ export function createRoomStore(firebaseConfig) {
     await set(connectionRef, true);
   }
 
+  /** Heure actuelle selon le serveur, pour juger l'inactivité comme les règles de sécurité. */
+  function serverNow() {
+    return Date.now() + serverOffset;
+  }
+
+  /** Note une action du participant (heure du serveur). */
+  function touch() {
+    return set(ref(db, `${ROOM}/participants/${uid}/lastActive`), serverTimestamp()).catch(() => {});
+  }
+
   /** Réserve un pseudo (transaction). Renvoie true si réservé, false s'il est pris. */
   async function claimPseudo(pseudo) {
     const present = presentUids(lastRoom);
@@ -82,6 +94,7 @@ export function createRoomStore(firebaseConfig) {
   /** Entre dans la salle avec un pseudo déjà réservé, et ouvre la présence. */
   async function enter(pseudo) {
     await set(ref(db, `${ROOM}/participants/${uid}/pseudo`), pseudo);
+    await touch();
     if (!entered) {
       entered = true;
       if (connected) await openPresence();
@@ -92,6 +105,7 @@ export function createRoomStore(firebaseConfig) {
   async function changePseudo(oldPseudo, newPseudo) {
     if (!(await claimPseudo(newPseudo))) return false;
     await set(ref(db, `${ROOM}/participants/${uid}/pseudo`), newPseudo);
+    touch();
     if (oldPseudo && pseudoKey(oldPseudo) !== pseudoKey(newPseudo)) {
       await remove(ref(db, `${ROOM}/pseudos/${pseudoKey(oldPseudo)}`)).catch(() => {});
     }
@@ -100,20 +114,24 @@ export function createRoomStore(firebaseConfig) {
 
   /** Vote pour le tour courant. Refusé par la base après révélation ou si le tour a changé. */
   function vote(value, round) {
+    touch();
     return set(ref(db, `${ROOM}/votes/${uid}`), { value, round }).then(() => true, () => false);
   }
 
   function clearVote() {
+    if (entered) touch();
     return remove(ref(db, `${ROOM}/votes/${uid}`)).then(() => true, () => false);
   }
 
   function reveal(round) {
+    touch();
     return set(ref(db, `${ROOM}/state`), { round, revealed: true }).then(() => true, () => false);
   }
 
   /** Nouveau vote : efface tous les votes et passe au tour suivant, en une seule écriture atomique. */
   function newRound(round) {
     // Refusé si un autre participant vient de le faire (tour périmé) : la salle est déjà remise à zéro.
+    touch();
     return update(ref(db, ROOM), newRoundUpdate(round)).then(() => true, () => false);
   }
 
@@ -128,8 +146,21 @@ export function createRoomStore(firebaseConfig) {
     ]);
   }
 
+  /** Retire les participants inactifs (refusé par les règles pour un participant actif). */
+  async function removeParticipants(uids) {
+    const results = await Promise.all(uids.map((other) =>
+      remove(ref(db, `${ROOM}/participants/${other}`)).then(() => true, () => false)));
+    return results.filter(Boolean).length;
+  }
+
+  /** Le participant a été retiré par un autre : ne plus rouvrir sa présence. */
+  async function stopPresence() {
+    entered = false;
+    await Promise.all(myConnections.splice(0).map((connectionRef) => onDisconnect(connectionRef).cancel().catch(() => {})));
+  }
+
   return {
-    start, onRoom, onConnection, claimPseudo, enter, changePseudo, vote, clearVote, reveal, newRound, leave,
+    start, serverNow, removeParticipants, stopPresence, onRoom, onConnection, claimPseudo, enter, changePseudo, vote, clearVote, reveal, newRound, leave,
     get uid() { return uid; },
   };
 }
