@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   CARDS, MESSAGES, validatePseudo, pseudoKey, isNumericCard,
   buildRoomView, computeResults, formatMean, newRoundUpdate,
-  INACTIVITY_MS, isInactive, confirmRemovalMessage,
+  INACTIVITY_MS, HEARTBEAT_MS, SWEEP_MS, isInactive,
 } from '../site/js/poker-core.js';
 
 const here = { c1: true };
@@ -215,7 +215,8 @@ test('mention « inactif » dans la vue, jamais pour soi-même', () => {
   assert.deepEqual(view.inactive.map((p) => p.pseudo), ['Paul']);
 });
 
-test('confirmation qui nomme les participants à retirer', () => {
-  assert.equal(confirmRemovalMessage(['Paul']), 'Retirer de la salle les participants inactifs depuis plus de 20 minutes : Paul ?');
-  assert.equal(confirmRemovalMessage(['Julie', 'Paul']), 'Retirer de la salle les participants inactifs depuis plus de 20 minutes : Julie et Paul ?');
+test('activité par interaction au plus toutes les 5 minutes, vérification chaque minute', () => {
+  assert.equal(HEARTBEAT_MS, 5 * MIN);
+  assert.equal(SWEEP_MS, MIN);
+  assert.ok(HEARTBEAT_MS + SWEEP_MS < INACTIVITY_MS, 'un participant qui interagit ne peut pas devenir inactif');
 });

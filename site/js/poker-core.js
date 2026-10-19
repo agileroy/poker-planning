@@ -18,11 +18,14 @@ export const SCISSORS = 'scissors';
 export const PSEUDO_MAX_LENGTH = 20;
 /** Délai au-delà duquel un participant sans action est inactif (même valeur dans database.rules.json). */
 export const INACTIVITY_MS = 20 * 60 * 1000;
+/** Fréquence maximale d'enregistrement de l'activité due aux seules interactions avec la page. */
+export const HEARTBEAT_MS = 5 * 60 * 1000;
+/** Fréquence de la vérification des inactifs par chaque navigateur. */
+export const SWEEP_MS = 60 * 1000;
 
 export const MESSAGES = Object.freeze({
   pseudoLength: `Choisissez un pseudo de 1 à ${PSEUDO_MAX_LENGTH} caractères`,
   pseudoTaken: 'Ce pseudo est déjà utilisé, choisissez-en un autre',
-  noInactive: 'Aucun participant inactif depuis plus de 20 minutes.',
   kicked: 'Vous avez été retiré de la salle pour inactivité',
 });
 
@@ -143,13 +146,6 @@ export function buildRoomView(raw, myUid, now = Date.now()) {
 export function isInactive(participant, now) {
   const last = participant?.lastActive;
   return typeof last !== 'number' || now - last > INACTIVITY_MS;
-}
-
-const listFormatter = new Intl.ListFormat('fr', { style: 'long', type: 'conjunction' });
-
-/** Question de confirmation qui nomme les participants à retirer. */
-export function confirmRemovalMessage(pseudos) {
-  return `Retirer de la salle les participants inactifs depuis plus de 20 minutes : ${listFormatter.format(pseudos)} ?`;
 }
 
 // ---------------------------------------------------------------- Résultats

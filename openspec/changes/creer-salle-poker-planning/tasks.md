@@ -19,6 +19,7 @@
 - [x] 3.4 Ajouter le bouton de thème clair / sombre (spec « Choix du thème clair ou sombre ») : suit le système par défaut, choix mémorisé et appliqué avant l'affichage, libellé accessible. Vérification : essais automatisés de bascule et de mémorisation, captures dans les deux thèmes.
 - [x] 3.5 Ajouter le bouton « Quitter » (spec « Quitter la salle ») : retrait immédiat de la présence, du vote non révélé et de la réservation du pseudo, tentative de fermeture de l'onglet, sinon écran « Vous avez quitté la salle » avec retour. Vérification : essai automatisé à deux navigateurs.
 - [x] 3.6 Ajouter l'activité des participants (heure serveur de la dernière action, mention « inactif » au-delà de 20 minutes) et le bouton « Réinitialiser les participants » (confirmation nominative, message s'il n'y a personne, règles Firebase limitant le retrait aux inactifs, écran pour le participant retiré). Vérification : tests unitaires de l'inactivité, essai automatisé à trois navigateurs.
+- [x] 3.7 Remplacer le bouton « Réinitialiser les participants » par le retrait automatique des inactifs (vérification chaque minute par chaque navigateur présent) et compter comme activité les interactions avec l'onglet affiché (au plus une fois toutes les 5 minutes). Vérification : essai automatisé (retrait sans clic, participant actif par la souris conservé, écran du retiré).
 
 ## 4. Vérification et publication
 

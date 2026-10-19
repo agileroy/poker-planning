@@ -1,7 +1,7 @@
 // Interface de la salle. Reçoit un « store » (Firebase en production, factice pour les essais)
 // et ne contient aucune règle métier : tout calcul passe par poker-core.js.
 
-import { CARDS, MESSAGES, validatePseudo, buildRoomView, cardByValue, confirmRemovalMessage } from './poker-core.js?v=__VERSION__';
+import { CARDS, MESSAGES, validatePseudo, buildRoomView, cardByValue, HEARTBEAT_MS, SWEEP_MS } from './poker-core.js?v=__VERSION__';
 
 const PSEUDO_STORAGE_KEY = 'poker-planning.pseudo';
 
@@ -39,7 +39,7 @@ export function showFatal(message) {
   $('status-text').classList.add('is-error');
 }
 
-export async function startApp(store) {
+export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTBEAT_MS } = {}) {
   let raw = null;
   let view = null;
   let pseudo = null;          // pseudo actuel dans la salle (null tant qu'on n'y est pas)
@@ -142,28 +142,24 @@ export async function startApp(store) {
     store.stopPresence();
   }
 
-  let resetTimer = null;
-  function resetMessage(text) {
-    $('reset-message').textContent = text;
-    clearTimeout(resetTimer);
-    if (text) resetTimer = setTimeout(() => { $('reset-message').textContent = ''; }, 6000);
+  // Retrait automatique : chaque navigateur présent retire les inactifs (jamais lui-même).
+  setInterval(() => {
+    if (!raw || pseudo === null) return;
+    const targets = buildRoomView(raw, store.uid, store.serverNow()).inactive;
+    if (targets.length) store.removeParticipants(targets.map((p) => p.uid));
+  }, sweepMs);
+
+  // Activité due aux interactions avec l'onglet affiché, enregistrée au plus toutes les 5 minutes.
+  let lastHeartbeat = Date.now();
+  const heartbeat = () => {
+    if (pseudo === null || document.visibilityState !== 'visible') return;
+    if (Date.now() - lastHeartbeat < heartbeatMs) return;
+    lastHeartbeat = Date.now();
+    store.touch();
+  };
+  for (const type of ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart']) {
+    document.addEventListener(type, heartbeat, { passive: true });
   }
-
-  $('reset-participants').addEventListener('click', async () => {
-    if (!view) return;
-    view = buildRoomView(raw, store.uid, store.serverNow());
-    const targets = view.inactive;
-    if (targets.length === 0) {
-      resetMessage(MESSAGES.noInactive);
-      return;
-    }
-    if (!window.confirm(confirmRemovalMessage(targets.map((p) => p.pseudo)))) return;
-    const removed = await store.removeParticipants(targets.map((p) => p.uid));
-    resetMessage(removed === 1 ? '1 participant retiré.' : `${removed} participants retirés.`);
-  });
-
-  // L'inactivité évolue avec le temps, même sans changement dans la salle.
-  setInterval(() => render(), 30 * 1000);
 
   $('leave').addEventListener('click', async () => {
     const leaving = pseudo;
@@ -219,12 +215,6 @@ export async function startApp(store) {
       const name = document.createElement('span');
       name.className = 'participant-name';
       name.textContent = p.pseudo;
-      if (p.inactive) {
-        const tag = document.createElement('span');
-        tag.className = 'participant-inactive';
-        tag.textContent = 'inactif';
-        name.append(tag);
-      }
       if (p.isMe) {
         const you = document.createElement('span');
         you.className = 'participant-you';

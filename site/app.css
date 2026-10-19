@@ -224,20 +224,6 @@ main { max-width: 960px; margin: 0 auto; padding: 0 16px 32px; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .actions .button { flex: 1 1 140px; }
 
-.reset-row { margin-top: 12px; display: grid; gap: 4px; justify-items: start; }
-.reset-row .link-button { font-size: 0.925rem; }
-.reset-message { margin: 0; color: var(--muted); font-size: 0.925rem; min-height: 1.45em; }
-
-.participant-inactive {
-  margin-left: 8px;
-  padding: 1px 8px;
-  border-radius: 999px;
-  background: var(--surface-2);
-  color: var(--muted);
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
 /* ---------------------------------------------------------------- Mini-cartes (liste) */
 
 .mini-card {

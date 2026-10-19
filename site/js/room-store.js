@@ -146,7 +146,7 @@ export function createRoomStore(firebaseConfig) {
     ]);
   }
 
-  /** Retire les participants inactifs (refusé par les règles pour un participant actif). */
+  /** Retire les participants inactifs (refusé par les règles pour un participant actif ; idempotent). */
   async function removeParticipants(uids) {
     const results = await Promise.all(uids.map((other) =>
       remove(ref(db, `${ROOM}/participants/${other}`)).then(() => true, () => false)));
@@ -160,7 +160,7 @@ export function createRoomStore(firebaseConfig) {
   }
 
   return {
-    start, serverNow, removeParticipants, stopPresence, onRoom, onConnection, claimPseudo, enter, changePseudo, vote, clearVote, reveal, newRound, leave,
+    start, serverNow, removeParticipants, stopPresence, touch, onRoom, onConnection, claimPseudo, enter, changePseudo, vote, clearVote, reveal, newRound, leave,
     get uid() { return uid; },
   };
 }

@@ -74,35 +74,30 @@ La salle SHALL proposer un bouton « Quitter ». Il SHALL retirer immédiatement
 - **THEN** il revient dans la salle sous le pseudo « Marc », sans le ressaisir
 
 ### Requirement: Activité des participants
-Chaque action d'un participant dans la salle SHALL mettre à jour l'heure de sa dernière activité, mesurée par l'horloge du serveur temps réel : arrivée dans la salle, vote, retrait de vote, « Révéler », « Nouveau vote » et changement de pseudo. Un participant sans action depuis plus de 20 minutes SHALL être considéré comme inactif ; la liste des présents SHALL afficher la mention « inactif » à côté de son pseudo. Le participant courant n'est jamais signalé inactif à lui-même.
+L'heure de la dernière activité d'un participant SHALL être mesurée par l'horloge du serveur temps réel. Comptent comme activité : l'arrivée dans la salle, le vote, le retrait de vote, « Révéler », « Nouveau vote », le changement de pseudo, et toute interaction avec la page (souris, clavier, écran tactile) pendant que l'onglet est affiché à l'écran. L'activité due aux seules interactions SHALL être enregistrée au plus une fois toutes les 5 minutes. Un participant sans activité depuis plus de 20 minutes SHALL être considéré comme inactif.
 
-#### Scenario: Participant inactif signalé
-- **GIVEN** Paul, présent, dont la dernière action date de 25 minutes
-- **WHEN** Julie regarde la liste des présents
-- **THEN** « inactif » s'affiche à côté de « Paul »
+#### Scenario: Participant qui suit une longue discussion
+- **GIVEN** Marc, qui n'a ni voté ni cliqué depuis 25 minutes mais a bougé la souris sur l'onglet affiché il y a 3 minutes
+- **WHEN** l'inactivité est évaluée
+- **THEN** Marc est actif
 
-#### Scenario: Activité par un vote
-- **GIVEN** Paul signalé inactif
-- **WHEN** Paul vote 3
-- **THEN** la mention « inactif » disparaît à côté de « Paul »
+#### Scenario: Onglet oublié en arrière-plan
+- **GIVEN** Paul, dont l'onglet est resté en arrière-plan sans aucune action depuis 2 heures
+- **WHEN** l'inactivité est évaluée
+- **THEN** Paul est inactif
 
-### Requirement: Réinitialiser les participants
-La salle SHALL proposer un bouton « Réinitialiser les participants », accessible à tous. S'il y a des participants inactifs, il SHALL demander une confirmation qui les nomme, puis les retirer de la salle : ils disparaissent de la liste, leurs votes ne sont plus comptés et leurs pseudos sont libérés. Il MUST NOT retirer le participant qui clique ni un participant actif. S'il n'y a aucun participant inactif, il SHALL afficher le message « Aucun participant inactif depuis plus de 20 minutes. » sans rien retirer. Les règles de sécurité du service temps réel MUST n'autoriser à retirer un autre participant que s'il est inactif depuis plus de 20 minutes selon l'horloge du serveur. Un participant retiré dont l'onglet est encore ouvert SHALL voir « Vous avez été retiré de la salle pour inactivité » avec le bouton « Revenir dans la salle ».
+### Requirement: Retrait automatique des inactifs
+Les participants inactifs SHALL être retirés automatiquement de la salle, sans action de personne : chaque navigateur présent dans la salle SHALL vérifier au moins une fois par minute s'il y a des participants inactifs et les retirer. Un retiré disparaît de la liste, son vote n'est plus compté et son pseudo est libéré. Un participant MUST NOT se retirer lui-même ni retirer un participant actif. Les règles de sécurité du service temps réel MUST n'autoriser à retirer un autre participant que s'il est inactif depuis plus de 20 minutes selon l'horloge du serveur. Un participant retiré dont l'onglet est encore ouvert SHALL voir « Vous avez été retiré de la salle pour inactivité » avec le bouton « Revenir dans la salle ».
 
-#### Scenario: Retrait des inactifs
-- **GIVEN** Julie active, Marc actif et Paul inactif depuis 2 heures
-- **WHEN** Julie clique sur « Réinitialiser les participants » et confirme
-- **THEN** Paul disparaît de la liste de Julie et de Marc, et Marc reste dans la salle
-
-#### Scenario: Aucun inactif
-- **GIVEN** des participants tous actifs
-- **WHEN** Julie clique sur « Réinitialiser les participants »
-- **THEN** le message « Aucun participant inactif depuis plus de 20 minutes. » s'affiche et personne n'est retiré
+#### Scenario: Retrait automatique
+- **GIVEN** Julie et Marc actifs dans la salle, et Paul inactif depuis 2 heures
+- **WHEN** une minute s'écoule
+- **THEN** Paul a disparu de la liste de Julie et de Marc, sans que personne n'ait cliqué
 
 #### Scenario: Retour d'un participant retiré
 - **GIVEN** Paul retiré pour inactivité, son onglet toujours ouvert
-- **WHEN** il revient devant son écran
-- **THEN** il voit « Vous avez été retiré de la salle pour inactivité » et peut revenir dans la salle sous son pseudo
+- **WHEN** il revient sur son onglet
+- **THEN** il voit « Vous avez été retiré de la salle pour inactivité » et peut revenir dans la salle sous son pseudo, sans le ressaisir
 
 ### Requirement: Rechargement et onglets multiples
 Recharger la page MUST NOT faire perdre au participant son pseudo ni son vote du tour en cours. Plusieurs onglets ouverts dans le même navigateur SHALL représenter un seul participant, présent tant qu'au moins un onglet est ouvert.
