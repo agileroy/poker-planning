@@ -6,9 +6,16 @@ context: |
   Outil de poker planning pour l'équipe de l'auteur, sans publicité, dépôt public.
   Jeu de cartes : ?, 0, 1, 2, 3, 5, 8 et une carte « ciseaux » (image).
   Les votes d'un participant ne doivent jamais être visibles des autres avant la révélation.
-  Tests : lanceur intégré de Node.js (npm test), à faire évoluer avec chaque changement de comportement.
-  À PRÉCISER (cadrage en cours) : hébergement, stack et mécanisme de temps réel,
-  rôles (animateur, observateur), règles de révélation et de résultats, langue de l'interface.
+  Hébergement : site statique sur GitHub Pages (https://vinchou59.github.io/poker-planning/), sans serveur à maintenir.
+  Temps réel : Firebase (offre gratuite) partage l'état des salles entre les navigateurs ;
+  aucun autre service tiers. Des participants se connectent via un VPN d'entreprise : n'utiliser que HTTPS (port 443),
+  pas de connexion directe entre navigateurs (WebRTC).
+  Stack : HTML/CSS/JavaScript vanilla en modules ES, sans framework ni étape de build (dossier site/), comme prepare-certification.
+  Séparer la logique métier pure (testable sans DOM ni Firebase) de l'interface et de l'accès à Firebase.
+  Tests : lanceur intégré de Node.js (npm test), à faire évoluer avec chaque changement de comportement ;
+  la publication GitHub Actions est bloquée si un test échoue.
+  À PRÉCISER (cadrage en cours) : accès aux salles, rôles (animateur, observateur),
+  règles de révélation et de résultats, langue de l'interface.
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
