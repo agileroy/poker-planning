@@ -1,0 +1,9 @@
+{
+  "name": "poker-planning",
+  "private": true,
+  "type": "module",
+  "description": "Outil de poker planning pour l'équipe, sans publicité",
+  "scripts": {
+    "test": "node --test"
+  }
+}

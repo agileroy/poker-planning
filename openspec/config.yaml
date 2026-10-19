@@ -1,0 +1,26 @@
+schema: spec-driven
+
+# Project context: constraints an agent cannot infer from the code.
+context: |
+  Rédiger tous les artefacts OpenSpec (proposal, design, specs, tasks) en français.
+  Outil de poker planning pour l'équipe de l'auteur, sans publicité, dépôt public.
+  Jeu de cartes : ?, 0, 1, 2, 3, 5, 8 et une carte « ciseaux » (image).
+  Les votes d'un participant ne doivent jamais être visibles des autres avant la révélation.
+  Tests : lanceur intégré de Node.js (npm test), à faire évoluer avec chaque changement de comportement.
+  À PRÉCISER (cadrage en cours) : hébergement, stack et mécanisme de temps réel,
+  rôles (animateur, observateur), règles de révélation et de résultats, langue de l'interface.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+
+# Per-operation guidance (optional)
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
