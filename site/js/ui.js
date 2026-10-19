@@ -53,6 +53,7 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
   let pseudo = null;          // pseudo actuel dans la salle (null tant qu'on n'y est pas)
   let everConnected = false;
   let seenInRoom = false;     // vrai dès que sa fiche est apparue dans la salle
+  let wasRevealed = null;     // état de la révélation au rendu précédent (null : premier rendu)
 
   // ---------------------------------------------------------------- Connexion
 
@@ -140,6 +141,7 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
 
   function showLeft(title) {
     pseudo = null;            // plus aucun rendu de la salle
+    wasRevealed = null;
     seenInRoom = false;
     $('me').hidden = true;
     $('left-title').textContent = title;
@@ -267,6 +269,12 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
     }
     view = buildRoomView(raw, store.uid, store.serverNow());
     if (view.me) seenInRoom = true;
+
+    // Courte vibration à la révélation (téléphones qui le permettent), jamais au premier rendu.
+    if (wasRevealed === false && view.revealed) {
+      try { navigator.vibrate?.(150); } catch { /* API absente ou refusée */ }
+    }
+    wasRevealed = view.revealed;
 
     // Présents
     const list = $('participants');
