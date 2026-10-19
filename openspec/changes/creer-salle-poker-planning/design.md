@@ -1,0 +1,72 @@
+## Context
+
+Dépôt neuf. L'auteur a déjà publié `prepare-certification` en site statique vanilla sur GitHub Pages, avec des tests `node --test` qui bloquent la publication : on reprend cette organisation. La différence de fond : ici, plusieurs navigateurs partagent le même état (présents, votes, révélation). L'auteur a choisi Firebase pour cet état partagé. Des participants passent par un VPN d'entreprise.
+
+## Goals / Non-Goals
+
+**Goals:**
+- Une salle unique, temps réel, utilisable sans compte depuis un ordinateur ou un téléphone, y compris derrière un VPN.
+- Des règles du jeu (vote figé après révélation, un participant ne touche qu'à son vote) appliquées par la base, pas seulement par l'interface.
+- Une logique métier pure, testée sans navigateur ni Firebase.
+
+**Non-Goals:**
+- Plusieurs salles, titre de story, historique, observateur, révélation automatique, minuteur.
+- Empêcher un utilisateur technique de lire les votes cachés dans les données (voir Risques).
+- Tests automatiques des règles Firebase (ils demandent l'émulateur Firebase et Java) : vérification manuelle documentée.
+
+## Decisions
+
+- **Structure du site** : `site/index.html`, `site/app.css`, `site/img/` (icône ciseaux SVG dessinée pour le projet, dos de carte en CSS), et dans `site/js/` :
+  - `poker-core.js` : logique pure, sans DOM ni Firebase (jeu de cartes, validation et normalisation du pseudo, vue de la salle à partir de l'état brut, calcul des résultats) ;
+  - `room-store.js` : seul module qui parle à Firebase (connexion, présence, pseudo, vote, révélation, nouveau vote) ;
+  - `app.js` : interface ;
+  - `firebase-config.js` : configuration publique du projet Firebase.
+  Alternative écartée : un framework avec étape de build, inutile pour cette taille.
+
+- **Realtime Database plutôt que Firestore** : elle gère nativement la présence (`.info/connected` et `onDisconnect`), qui est le cœur de la liste des présents, et passe par WebSocket ou, à défaut, par requêtes HTTPS longues : compatible VPN. Région `europe-west1`.
+
+- **SDK Firebase** : modules ES officiels chargés depuis `https://www.gstatic.com/firebasejs/<version>/…`, version épinglée à la dernière version stable au moment de l'implémentation. Pas de dépendance npm.
+
+- **Identité** : authentification anonyme Firebase. Chaque navigateur reçoit un identifiant stable (`uid`), conservé par le SDK : rechargements et onglets multiples gardent la même identité. Le pseudo est mémorisé dans `localStorage` (lecture et écriture protégées par try/catch).
+
+- **Modèle de données** (sous `/room`) :
+  - `state` : `{ round: entier, revealed: booléen }` ;
+  - `participants/{uid}` : `{ pseudo, connections: { {connId}: true } }`, une entrée de connexion par onglet, retirée par `onDisconnect`. Un participant est présent tant qu'il a au moins une connexion ; son entrée est supprimée avec la dernière ;
+  - `pseudos/{cléNormalisée}` : `uid` du titulaire, pour garantir l'unicité ;
+  - `votes/{uid}` : `{ value, round }`.
+
+- **Unicité du pseudo** : réservation par transaction sur `pseudos/{clé}` (clé = pseudo en minuscules, sans espaces de bord, caractères interdits par Firebase `.#$[]/` encodés). La réservation réussit si la clé est libre ou déjà à soi ; elle est libérée par `onDisconnect` et lors d'un changement de pseudo. Les règles interdisent d'écraser la réservation d'un autre.
+
+- **Tours de vote par numéro** : « Nouveau vote » incrémente `state.round` et remet `revealed` à `false`, sans toucher aux votes des autres. Un vote ne compte que si son `round` est le tour courant et que son auteur est présent. Alternative écartée : effacer tous les votes, qui obligerait à autoriser chacun à écrire chez les autres.
+
+- **Votes conservés à la déconnexion** : `votes/{uid}` n'est pas effacé quand le participant part. Un participant absent n'est ni affiché ni compté (spec « Départ avant la révélation ») ; s'il revient pendant le même tour, son vote réapparaît. C'est ce qui permet de garder son vote au rechargement.
+
+- **Révélation et vote figé** : « Révéler » écrit `revealed = true`. Les règles refusent toute écriture dans `votes/{uid}` quand `state.revealed` est vrai, et refusent un `round` différent du tour courant ou une `value` hors du jeu de cartes. Une révélation concurrente de deux participants donne le même résultat ; un « Nouveau vote » passe par une transaction sur `state`.
+
+- **Valeurs de carte** : chaînes `"?"`, `"0"`, `"1"`, `"2"`, `"3"`, `"5"`, `"8"`, `"scissors"`, définies une seule fois dans `poker-core.js` et reprises dans les règles.
+
+- **Format des nombres** : `Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 })` pour la moyenne.
+
+- **Tests** : `tests/poker-core.test.mjs` couvre la validation du pseudo, la vue de la salle (présence, votes du tour courant, carte de dos), et tous les scénarios de `vote-results`. Les parcours temps réel sont vérifiés à la main avec deux navigateurs, en suivant une liste de contrôle dans `tasks.md`.
+
+- **Publication** : workflow `.github/workflows/pages.yml` repris de `prepare-certification` (tests puis publication de `site/`).
+
+## Risks / Trade-offs
+
+- [Votes cachés lisibles dans les données par un utilisateur technique avant la révélation] → Assumé pour une équipe de confiance ; l'interface ne les montre jamais. Un vrai secret demanderait un serveur, hors de la solution choisie.
+- [Configuration Firebase publique dans le dépôt] → Normal pour Firebase : la protection repose sur les règles de sécurité, l'authentification anonyme et la liste des domaines autorisés (`vinchou59.github.io`, `localhost`).
+- [Salle accessible à toute personne qui a l'adresse] → Accepté : lien partagé à l'équipe seulement. Un mot de passe de salle pourra venir plus tard.
+- [Détection d'une coupure brutale (ordinateur mis en veille) jusqu'à une minute environ] → Délai propre à Firebase, acceptable.
+- [Domaines Firebase bloqués par un proxy d'entreprise] → Test au premier essai avec un collègue sous VPN ; message « Connexion perdue » explicite en cas d'échec.
+- [Limites de l'offre gratuite (100 connexions simultanées)] → Largement suffisant pour une équipe.
+
+## Migration Plan
+
+1. L'auteur crée le projet Firebase (guidé pas à pas) : Realtime Database en `europe-west1`, authentification anonyme activée, domaine `vinchou59.github.io` autorisé ; il transmet la configuration web.
+2. Implémenter, tester en local (`localhost`) avec deux navigateurs.
+3. Publier les règles `database.rules.json` dans la console Firebase.
+4. Activer GitHub Pages (source : GitHub Actions), pousser sur `main`, vérifier le site publié, puis un essai depuis le VPN.
+
+## Open Questions
+
+_Aucune._
