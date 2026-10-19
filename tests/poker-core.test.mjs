@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   CARDS, MESSAGES, validatePseudo, pseudoKey, isNumericCard,
   buildRoomView, computeResults, formatMean, newRoundUpdate,
-  INACTIVITY_MS, HEARTBEAT_MS, SWEEP_MS, isInactive,
+  INACTIVITY_MS, HEARTBEAT_MS, SWEEP_MS, isInactive, computeExtremes,
 } from '../site/js/poker-core.js';
 
 const here = { c1: true };
@@ -219,4 +219,46 @@ test('activité par interaction au plus toutes les 5 minutes, vérification chaq
   assert.equal(HEARTBEAT_MS, 5 * MIN);
   assert.equal(SWEEP_MS, MIN);
   assert.ok(HEARTBEAT_MS + SWEEP_MS < INACTIVITY_MS, 'un participant qui interagit ne peut pas devenir inactif');
+});
+
+// ---------------------------------------------------------------- Votes extrêmes
+
+test('extrêmes : plus bas 1 — Julie, plus haut 8 — Léa, Marc', () => {
+  const e = computeExtremes([
+    { pseudo: 'Julie', vote: '1' }, { pseudo: 'Marc', vote: '8' }, { pseudo: 'Léa', vote: '8' }, { pseudo: 'Paul', vote: '3' },
+  ]);
+  assert.deepEqual(e, { low: { value: '1', pseudos: ['Julie'] }, high: { value: '8', pseudos: ['Léa', 'Marc'] } });
+});
+
+test('extrêmes : ? et ciseaux ignorés', () => {
+  const e = computeExtremes([
+    { pseudo: 'Julie', vote: '?' }, { pseudo: 'Marc', vote: '2' }, { pseudo: 'Léa', vote: '5' }, { pseudo: 'Paul', vote: 'scissors' },
+  ]);
+  assert.deepEqual(e, { low: { value: '2', pseudos: ['Marc'] }, high: { value: '5', pseudos: ['Léa'] } });
+});
+
+test('pas d\'extrêmes sans au moins deux valeurs chiffrées différentes', () => {
+  assert.equal(computeExtremes([{ pseudo: 'Julie', vote: '3' }, { pseudo: 'Marc', vote: '3' }, { pseudo: 'Léa', vote: '?' }]), null);
+  assert.equal(computeExtremes([{ pseudo: 'Julie', vote: '0' }]), null);
+  assert.equal(computeExtremes([]), null);
+});
+
+test('vue révélée : extrêmes dans les résultats et marque sur les participants', () => {
+  const view = buildRoomView({
+    state: { round: 1, revealed: true },
+    participants: { a: { pseudo: 'Julie', connections: here }, b: { pseudo: 'Marc', connections: here }, c: { pseudo: 'Paul', connections: here } },
+    votes: { a: { value: '1', round: 1 }, b: { value: '8', round: 1 }, c: { value: '3', round: 1 } },
+  }, 'a');
+  assert.deepEqual(view.participants.map((p) => [p.pseudo, p.extreme]), [['Julie', 'low'], ['Marc', 'high'], ['Paul', null]]);
+  assert.equal(view.results.extremes.high.value, '8');
+});
+
+test('vue non révélée : aucun extrême exposé', () => {
+  const view = buildRoomView({
+    state: { round: 1, revealed: false },
+    participants: { a: { pseudo: 'Julie', connections: here } },
+    votes: { a: { value: '1', round: 1 } },
+  }, 'a');
+  assert.equal(view.results, null);
+  assert.equal(view.participants[0].extreme, undefined);
 });

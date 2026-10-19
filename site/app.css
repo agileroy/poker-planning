@@ -350,6 +350,26 @@ main { max-width: 960px; margin: 0 auto; padding: 0 16px 32px; }
   background: var(--accent-soft);
   font-weight: 650;
 }
+.extremes { margin: 14px 0 0; display: grid; gap: 6px; }
+.extreme { display: flex; align-items: baseline; gap: 10px; }
+.extreme dt { flex: none; width: 5.5em; color: var(--muted); font-size: 0.875rem; }
+.extreme dt::before { display: inline-block; width: 1.1em; font-weight: 800; }
+.extreme-low dt::before { content: "↓"; }
+.extreme-high dt::before { content: "↑"; }
+.extreme dd { margin: 0; font-weight: 650; overflow-wrap: anywhere; }
+.extreme-value { display: inline-block; min-width: 1.6em; padding: 0 6px; margin-right: 6px; border-radius: 6px; background: var(--accent-soft); text-align: center; }
+
+.mini-card.is-extreme { border-width: 3px; position: relative; }
+.mini-card.is-extreme::after {
+  position: absolute; top: -9px; right: -9px;
+  width: 18px; height: 18px; border-radius: 999px;
+  display: grid; place-items: center;
+  background: var(--accent); color: var(--accent-text);
+  font-size: 11px; font-weight: 800; line-height: 1;
+}
+.mini-card.extreme-low::after { content: "↓"; }
+.mini-card.extreme-high::after { content: "↑"; }
+
 .notice { margin: 14px 0 0; padding: 10px 12px; border-radius: 10px; font-weight: 650; }
 .notice-success { background: var(--success-bg); color: var(--success-text); }
 .notice-warning { background: var(--warning-bg); color: var(--warning-text); display: flex; align-items: center; gap: 8px; }

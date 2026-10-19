@@ -126,6 +126,16 @@ export function buildRoomView(raw, myUid, now = Date.now()) {
   const voters = participants.filter((p) => p.hasVoted);
   const me = participants.find((p) => p.isMe) ?? null;
 
+  let results = null;
+  if (revealed) {
+    results = { ...computeResults(voters.map((p) => p.vote)), extremes: computeExtremes(voters) };
+    for (const p of participants) {
+      p.extreme = !results.extremes || p.vote === null ? null
+        : p.vote === results.extremes.low.value ? 'low'
+          : p.vote === results.extremes.high.value ? 'high' : null;
+    }
+  }
+
   return {
     round,
     revealed,
@@ -136,7 +146,7 @@ export function buildRoomView(raw, myUid, now = Date.now()) {
     inactive: participants.filter((p) => p.inactive),
     canVote: !revealed,
     canReveal: !revealed && voters.length > 0,
-    results: revealed ? computeResults(voters.map((p) => p.vote)) : null,
+    results,
   };
 }
 
@@ -149,6 +159,24 @@ export function isInactive(participant, now) {
 }
 
 // ---------------------------------------------------------------- Résultats
+
+/**
+ * Votes chiffrés extrêmes, avec les pseudos de ceux qui les ont joués.
+ * `null` s'il y a moins de deux valeurs chiffrées différentes.
+ * @param {{pseudo: string, vote: string|null}[]} voters
+ */
+export function computeExtremes(voters) {
+  const numeric = voters.filter((v) => isNumericCard(v.vote));
+  const values = [...new Set(numeric.map((v) => Number(v.vote)))].sort((a, b) => a - b);
+  if (values.length < 2) return null;
+  const pick = (value) => ({
+    value: String(value),
+    pseudos: numeric.filter((v) => Number(v.vote) === value).map((v) => v.pseudo)
+      .sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' })),
+  });
+  return { low: pick(values[0]), high: pick(values.at(-1)) };
+}
+
 
 const meanFormatter = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 });
 

@@ -270,6 +270,11 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
       if (view.revealed && p.vote !== null) {
         mini.classList.add('is-face');
         mini.append(cardContent(p.vote));
+        if (p.extreme) {
+          mini.classList.add('is-extreme', `extreme-${p.extreme}`);
+          mini.setAttribute('role', 'img');
+          mini.setAttribute('aria-label', `${cardByValue(p.vote)?.alt ?? p.vote}, ${p.extreme === 'low' ? 'vote le plus bas' : 'vote le plus haut'}`);
+        }
       } else if (p.hasVoted) {
         mini.classList.add('is-back');
         mini.setAttribute('role', 'img');
@@ -309,6 +314,16 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
         li.append(`${entry.count} × `, cardContent(entry.value));
         return li;
       }));
+      const extremes = results.extremes;
+      $('extremes').hidden = !extremes;
+      if (extremes) {
+        for (const side of ['low', 'high']) {
+          const value = document.createElement('span');
+          value.className = 'extreme-value';
+          value.textContent = extremes[side].value;
+          $(`extreme-${side}`).replaceChildren(value, extremes[side].pseudos.join(', '));
+        }
+      }
       $('consensus').hidden = results.consensus === null;
       $('consensus').textContent = results.consensus === null ? '' : `Consensus : ${results.consensus}`;
       const alert = $('scissors-alert');
