@@ -421,6 +421,13 @@ main { max-width: 960px; margin: 0 auto; padding: 0 16px 32px; }
 
 .notice { margin: 14px 0 0; padding: 10px 12px; border-radius: 10px; font-weight: 650; }
 .notice-success { background: var(--success-bg); color: var(--success-text); }
+.notice-info { background: var(--surface-2); color: var(--text); display: flex; align-items: flex-start; gap: 10px; font-weight: 600; }
+.notice-info .question-mark {
+  flex: none; width: 24px; height: 32px; border-radius: 5px;
+  display: grid; place-items: center;
+  border: 1.5px solid var(--accent); color: var(--accent); background: var(--card-face);
+  font-weight: 800;
+}
 .notice-warning { background: var(--warning-bg); color: var(--warning-text); display: flex; align-items: center; gap: 8px; }
 
 @keyframes drop-in { from { transform: translateY(-6px); opacity: 0; } to { transform: none; opacity: 1; } }

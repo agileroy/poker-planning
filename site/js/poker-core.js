@@ -130,7 +130,12 @@ export function buildRoomView(raw, myUid, now = Date.now()) {
 
   let results = null;
   if (revealed) {
-    results = { ...computeResults(voters.map((p) => p.vote)), extremes: computeExtremes(voters) };
+    results = {
+      ...computeResults(voters.map((p) => p.vote)),
+      extremes: computeExtremes(voters),
+      questionPseudos: voters.filter((p) => p.vote === '?').map((p) => p.pseudo)
+        .sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' })),
+    };
     for (const p of participants) {
       p.extreme = !results.extremes || p.vote === null ? null
         : p.vote === results.extremes.low.value ? 'low'
@@ -153,6 +158,16 @@ export function buildRoomView(raw, myUid, now = Date.now()) {
     canReveal: !revealed && voters.length > 0,
     results,
   };
+}
+
+const listFormatter = new Intl.ListFormat('fr', { style: 'long', type: 'conjunction' });
+
+/** Message qui nomme les participants ayant joué « ? » ; chaîne vide s'il n'y en a pas. */
+export function questionMessage(pseudos) {
+  if (!pseudos.length) return '';
+  return pseudos.length === 1
+    ? `${pseudos[0]} a joué « ? » : prenez le temps de clarifier la story avec elle ou lui.`
+    : `${listFormatter.format(pseudos)} ont joué « ? » : prenez le temps de clarifier la story avec eux.`;
 }
 
 /** Révélation automatique possible : cartes cachées et chaque votant présent (hors observateurs) a voté. */

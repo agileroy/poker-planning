@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   CARDS, MESSAGES, validatePseudo, pseudoKey, isNumericCard,
   buildRoomView, computeResults, formatMean, newRoundUpdate,
-  INACTIVITY_MS, HEARTBEAT_MS, SWEEP_MS, isInactive, computeExtremes, voteCountLabel, allVotersVoted, AUTO_REVEAL_SECONDS,
+  INACTIVITY_MS, HEARTBEAT_MS, SWEEP_MS, isInactive, computeExtremes, voteCountLabel, allVotersVoted, AUTO_REVEAL_SECONDS, questionMessage,
 } from '../site/js/poker-core.js';
 
 const here = { c1: true };
@@ -323,4 +323,29 @@ test('révélation automatique : tous les votants présents ont voté', () => {
 test('option de révélation automatique lue dans settings', () => {
   assert.equal(buildRoomView({ settings: { autoReveal: true } }, 'a').autoReveal, true);
   assert.equal(buildRoomView({}, 'a').autoReveal, false);
+});
+
+// ---------------------------------------------------------------- Questions (carte ?)
+
+const revealedWith = (votes) => buildRoomView({
+  state: { round: 1, revealed: true },
+  participants: Object.fromEntries(Object.keys(votes).map((name) => [name, { pseudo: name, connections: here }])),
+  votes: Object.fromEntries(Object.entries(votes).map(([name, value]) => [name, { value, round: 1 }])),
+}, 'Marc');
+
+test('une question : « Julie a joué « ? » … avec elle ou lui. »', () => {
+  const view = revealedWith({ Julie: '?', Marc: '3', Paul: '5' });
+  assert.deepEqual(view.results.questionPseudos, ['Julie']);
+  assert.equal(questionMessage(view.results.questionPseudos), 'Julie a joué « ? » : prenez le temps de clarifier la story avec elle ou lui.');
+});
+
+test('plusieurs questions, triées : « Julie et Paul ont joué « ? » … avec eux. »', () => {
+  const view = revealedWith({ Paul: '?', Julie: '?', Marc: '3' });
+  assert.equal(questionMessage(view.results.questionPseudos), 'Julie et Paul ont joué « ? » : prenez le temps de clarifier la story avec eux.');
+});
+
+test('aucune question : pas de message', () => {
+  const view = revealedWith({ Julie: '3', Marc: '5' });
+  assert.deepEqual(view.results.questionPseudos, []);
+  assert.equal(questionMessage([]), '');
 });

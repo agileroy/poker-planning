@@ -2,7 +2,7 @@
 // et ne contient aucune règle métier : tout calcul passe par poker-core.js.
 
 import { launchConfetti } from './confetti.js?v=__VERSION__';
-import { CARDS, MESSAGES, validatePseudo, buildRoomView, cardByValue, voteCountLabel, allVotersVoted, AUTO_REVEAL_SECONDS, HEARTBEAT_MS, SWEEP_MS } from './poker-core.js?v=__VERSION__';
+import { CARDS, MESSAGES, validatePseudo, buildRoomView, cardByValue, voteCountLabel, allVotersVoted, AUTO_REVEAL_SECONDS, questionMessage, HEARTBEAT_MS, SWEEP_MS } from './poker-core.js?v=__VERSION__';
 
 const PSEUDO_STORAGE_KEY = 'poker-planning.pseudo';
 const ROLE_STORAGE_KEY = 'poker-planning.role';
@@ -400,6 +400,17 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
       }
       $('consensus').hidden = results.consensus === null;
       $('consensus').textContent = results.consensus === null ? '' : `Consensus : ${results.consensus}`;
+      const question = $('question-alert');
+      question.hidden = results.questionPseudos.length === 0;
+      if (!question.hidden) {
+        const mark = document.createElement('span');
+        mark.className = 'question-mark';
+        mark.setAttribute('aria-hidden', 'true');
+        mark.textContent = '?';
+        const text = document.createElement('span');
+        text.textContent = questionMessage(results.questionPseudos);
+        question.replaceChildren(mark, text);
+      }
       const alert = $('scissors-alert');
       alert.hidden = results.scissorsCount === 0;
       alert.replaceChildren(cardContent('scissors'),
