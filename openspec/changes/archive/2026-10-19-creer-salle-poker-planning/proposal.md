@@ -13,6 +13,7 @@ L'équipe estime ses stories en poker planning avec des outils en ligne gratuits
 - Un bouton **« Nouveau vote »**, accessible à tous, remet tous les votes à zéro.
 - Après la révélation : répartition des votes, moyenne des cartes chiffrées (hors `?` et ✂️), message de consensus, et alerte « story à découper ? » si une carte ✂️ a été jouée.
 - Site statique publié sur GitHub Pages ; l'état partagé de la salle passe par Firebase (offre gratuite).
+- Ajouts décidés pendant l'implémentation : bouton de thème clair / sombre, bouton « Quitter », retrait automatique des participants inactifs depuis plus de 20 minutes, QR code pour rejoindre depuis un téléphone (le VPN de l'entreprise bloque GitHub Pages et Firebase).
 
 Hors périmètre de cette première version : plusieurs salles, titre de la story, historique des votes, mode observateur, révélation automatique, minuteur.
 
