@@ -164,12 +164,12 @@ export function buildRoomView(raw, myUid, now = Date.now()) {
 
 const listFormatter = new Intl.ListFormat('fr', { style: 'long', type: 'conjunction' });
 
-/** Message qui nomme les participants ayant joué « ? » ; chaîne vide s'il n'y en a pas. */
+/** Message qui nomme les participants ayant joué « ? » : { title, text }, ou null s'il n'y en a pas. */
 export function questionMessage(pseudos) {
-  if (!pseudos.length) return '';
+  if (!pseudos.length) return null;
   return pseudos.length === 1
-    ? `${pseudos[0]} a joué « ? » : prenez le temps de clarifier la story avec elle ou lui.`
-    : `${listFormatter.format(pseudos)} ont joué « ? » : prenez le temps de clarifier la story avec eux.`;
+    ? { title: `${pseudos[0]} a joué « ? »`, text: 'Prenez le temps de clarifier la story avec elle ou lui.' }
+    : { title: `${listFormatter.format(pseudos)} ont joué « ? »`, text: 'Prenez le temps de clarifier la story avec eux.' };
 }
 
 /** Révélation automatique possible : cartes cachées et chaque votant présent (hors observateurs) a voté. */

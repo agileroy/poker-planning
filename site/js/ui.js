@@ -406,21 +406,15 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
       }
       $('consensus').hidden = results.consensus === null;
       $('consensus').textContent = results.consensus === null ? '' : `Consensus : ${results.consensus}`;
-      const question = $('question-alert');
-      question.hidden = results.questionPseudos.length === 0;
-      if (!question.hidden) {
-        const mark = document.createElement('span');
-        mark.className = 'question-mark';
-        mark.setAttribute('aria-hidden', 'true');
-        mark.textContent = '?';
-        const text = document.createElement('span');
-        text.textContent = questionMessage(results.questionPseudos);
-        question.replaceChildren(mark, text);
+      const question = questionMessage(results.questionPseudos);
+      $('question-alert').hidden = !question;
+      if (question) {
+        $('question-title').textContent = question.title;
+        $('question-text').textContent = question.text;
       }
-      const alert = $('scissors-alert');
-      alert.hidden = results.scissorsCount === 0;
-      alert.replaceChildren(cardContent('scissors'),
-        `Story à découper ? (${results.scissorsCount} ${results.scissorsCount > 1 ? 'cartes ciseaux' : 'carte ciseaux'})`);
+      $('scissors-alert').hidden = results.scissorsCount === 0;
+      $('scissors-text').textContent = results.scissorsCount > 1
+        ? `${results.scissorsCount} cartes ciseaux jouées.` : '1 carte ciseaux jouée.';
     }
   }
 

@@ -334,21 +334,21 @@ const revealedWith = (votes) => buildRoomView({
   votes: Object.fromEntries(Object.entries(votes).map(([name, value]) => [name, { value, round: 1 }])),
 }, 'Marc');
 
-test('une question : « Julie a joué « ? » … avec elle ou lui. »', () => {
+test('une question : titre « Julie a joué « ? » », texte « … avec elle ou lui. »', () => {
   const view = revealedWith({ Julie: '?', Marc: '3', Paul: '5' });
   assert.deepEqual(view.results.questionPseudos, ['Julie']);
-  assert.equal(questionMessage(view.results.questionPseudos), 'Julie a joué « ? » : prenez le temps de clarifier la story avec elle ou lui.');
+  assert.deepEqual(questionMessage(view.results.questionPseudos), { title: 'Julie a joué « ? »', text: 'Prenez le temps de clarifier la story avec elle ou lui.' });
 });
 
 test('plusieurs questions, triées : « Julie et Paul ont joué « ? » … avec eux. »', () => {
   const view = revealedWith({ Paul: '?', Julie: '?', Marc: '3' });
-  assert.equal(questionMessage(view.results.questionPseudos), 'Julie et Paul ont joué « ? » : prenez le temps de clarifier la story avec eux.');
+  assert.deepEqual(questionMessage(view.results.questionPseudos), { title: 'Julie et Paul ont joué « ? »', text: 'Prenez le temps de clarifier la story avec eux.' });
 });
 
 test('aucune question : pas de message', () => {
   const view = revealedWith({ Julie: '3', Marc: '5' });
   assert.deepEqual(view.results.questionPseudos, []);
-  assert.equal(questionMessage([]), '');
+  assert.equal(questionMessage([]), null);
 });
 
 // ---------------------------------------------------------------- Écart important
