@@ -37,6 +37,11 @@
         }
       },
 
+      "settings": {
+        "autoReveal": { ".write": "auth != null", ".validate": "newData.isBoolean()" },
+        "$other": { ".validate": false }
+      },
+
       "pseudos": {
         "$key": {
           ".write": "auth != null && ((newData.val() === auth.uid && (!data.exists() || data.val() === auth.uid || !root.child('room/participants').child(data.val()).child('connections').exists())) || (!newData.exists() && data.val() === auth.uid))",

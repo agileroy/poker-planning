@@ -1,7 +1,7 @@
 // Interface de la salle. Reçoit un « store » (Firebase en production, factice pour les essais)
 // et ne contient aucune règle métier : tout calcul passe par poker-core.js.
 
-import { CARDS, MESSAGES, validatePseudo, buildRoomView, cardByValue, voteCountLabel, HEARTBEAT_MS, SWEEP_MS } from './poker-core.js?v=__VERSION__';
+import { CARDS, MESSAGES, validatePseudo, buildRoomView, cardByValue, voteCountLabel, allVotersVoted, AUTO_REVEAL_SECONDS, HEARTBEAT_MS, SWEEP_MS } from './poker-core.js?v=__VERSION__';
 
 const PSEUDO_STORAGE_KEY = 'poker-planning.pseudo';
 const ROLE_STORAGE_KEY = 'poker-planning.role';
@@ -140,6 +140,7 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
   });
 
   function showLeft(title) {
+    stopCountdown();
     pseudo = null;            // plus aucun rendu de la salle
     wasRevealed = null;
     seenInRoom = false;
@@ -255,6 +256,36 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
     });
   }
 
+  $('auto-reveal').addEventListener('change', (event) => store.setAutoReveal(event.target.checked));
+
+  // Révélation automatique : décompte local, annulé dès que la condition ne tient plus.
+  let countdown = null;   // { timer, remaining }
+  function stopCountdown() {
+    if (!countdown) return;
+    clearInterval(countdown.timer);
+    countdown = null;
+    $('countdown').hidden = true;
+  }
+  function updateCountdown() {
+    const ready = view && view.autoReveal && allVotersVoted(view);
+    if (!ready) { stopCountdown(); return; }
+    if (countdown) return;                       // déjà lancé : un changement de carte ne le relance pas
+    countdown = { remaining: AUTO_REVEAL_SECONDS };
+    const show = () => {
+      $('countdown').textContent = `Révélation dans ${countdown.remaining}…`;
+      $('countdown').hidden = false;
+    };
+    show();
+    countdown.timer = setInterval(() => {
+      countdown.remaining -= 1;
+      if (countdown.remaining > 0) { show(); return; }
+      const round = view.round;
+      const stillReady = view.autoReveal && allVotersVoted(view);
+      stopCountdown();
+      if (stillReady) store.reveal(round);
+    }, 1000);
+  }
+
   $('reveal').addEventListener('click', () => view?.canReveal && store.reveal(view.round));
   $('new-round').addEventListener('click', () => view && store.newRound(view.round));
 
@@ -342,6 +373,8 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
       : view.myVote !== null ? 'Recliquez sur votre carte pour retirer votre vote.' : '';
 
     $('reveal').disabled = !view.canReveal;
+    $('auto-reveal').checked = view.autoReveal;
+    updateCountdown();
 
     // Résultats
     const results = view.results;

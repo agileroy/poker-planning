@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   CARDS, MESSAGES, validatePseudo, pseudoKey, isNumericCard,
   buildRoomView, computeResults, formatMean, newRoundUpdate,
-  INACTIVITY_MS, HEARTBEAT_MS, SWEEP_MS, isInactive, computeExtremes, voteCountLabel,
+  INACTIVITY_MS, HEARTBEAT_MS, SWEEP_MS, isInactive, computeExtremes, voteCountLabel, allVotersVoted, AUTO_REVEAL_SECONDS,
 } from '../site/js/poker-core.js';
 
 const here = { c1: true };
@@ -298,4 +298,29 @@ test('un observateur ne peut pas voter mais peut révéler', () => {
   const view = buildRoomView(withObserver(), 'uLea');
   assert.equal(view.canVote, false);
   assert.equal(view.canReveal, true);
+});
+
+// ---------------------------------------------------------------- Révélation automatique
+
+test('révélation automatique : tous les votants présents ont voté', () => {
+  const raw = (votes, extra = {}) => ({
+    state: { round: 1, revealed: false },
+    participants: {
+      a: { pseudo: 'Julie', connections: here },
+      b: { pseudo: 'Marc', connections: here },
+      c: { pseudo: 'Léa', connections: here, observer: true },
+    },
+    votes, ...extra,
+  });
+  assert.equal(AUTO_REVEAL_SECONDS, 3);
+  assert.equal(allVotersVoted(buildRoomView(raw({ a: { value: '3', round: 1 }, b: { value: '5', round: 1 } }), 'a')), true, 'observatrice non attendue');
+  assert.equal(allVotersVoted(buildRoomView(raw({ a: { value: '3', round: 1 } }), 'a')), false, 'Marc manque');
+  assert.equal(allVotersVoted(buildRoomView(raw({ a: { value: '3', round: 1 }, b: { value: '5', round: 0 } }), 'a')), false, 'vote d\'un ancien tour');
+  assert.equal(allVotersVoted(buildRoomView(raw({ a: { value: '3', round: 1 }, b: { value: '5', round: 1 } }, { state: { round: 1, revealed: true } }), 'a')), false, 'déjà révélé');
+  assert.equal(allVotersVoted(buildRoomView({ state: { round: 0, revealed: false }, participants: {} }, 'a')), false, 'salle vide');
+});
+
+test('option de révélation automatique lue dans settings', () => {
+  assert.equal(buildRoomView({ settings: { autoReveal: true } }, 'a').autoReveal, true);
+  assert.equal(buildRoomView({}, 'a').autoReveal, false);
 });

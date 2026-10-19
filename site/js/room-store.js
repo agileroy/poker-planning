@@ -101,6 +101,12 @@ export function createRoomStore(firebaseConfig) {
     }
   }
 
+  /** Active ou désactive la révélation automatique pour toute la salle. */
+  function setAutoReveal(enabled) {
+    touch();
+    return set(ref(db, `${ROOM}/settings/autoReveal`), enabled).then(() => true, () => false);
+  }
+
   /** Choisit de voter ou d'observer ; un observateur retire son vote du tour en cours. */
   async function setObserver(observer) {
     touch();
@@ -167,7 +173,7 @@ export function createRoomStore(firebaseConfig) {
   }
 
   return {
-    start, serverNow, removeParticipants, stopPresence, touch, setObserver, onRoom, onConnection, claimPseudo, enter, changePseudo, vote, clearVote, reveal, newRound, leave,
+    start, serverNow, removeParticipants, stopPresence, touch, setObserver, setAutoReveal, onRoom, onConnection, claimPseudo, enter, changePseudo, vote, clearVote, reveal, newRound, leave,
     get uid() { return uid; },
   };
 }

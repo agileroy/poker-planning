@@ -141,6 +141,7 @@ export function buildRoomView(raw, myUid, now = Date.now()) {
   return {
     round,
     revealed,
+    autoReveal: raw?.settings?.autoReveal === true,
     participants,
     me,
     myVote: me ? me.vote : voteOf(myUid),
@@ -153,6 +154,15 @@ export function buildRoomView(raw, myUid, now = Date.now()) {
     results,
   };
 }
+
+/** Révélation automatique possible : cartes cachées et chaque votant présent (hors observateurs) a voté. */
+export function allVotersVoted(view) {
+  const voters = view.participants.filter((p) => !p.observer);
+  return !view.revealed && voters.length > 0 && voters.every((p) => p.hasVoted);
+}
+
+/** Durée du décompte avant la révélation automatique, en secondes. */
+export const AUTO_REVEAL_SECONDS = 3;
 
 /** Libellé du compteur : « 2 / 3 votes », suivi de « · 1 observateur » s'il y en a. */
 export function voteCountLabel({ voteCount, voterCount, observerCount }) {
