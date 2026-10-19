@@ -1,6 +1,7 @@
 // Interface de la salle. Reçoit un « store » (Firebase en production, factice pour les essais)
 // et ne contient aucune règle métier : tout calcul passe par poker-core.js.
 
+import { launchConfetti } from './confetti.js?v=__VERSION__';
 import { CARDS, MESSAGES, validatePseudo, buildRoomView, cardByValue, voteCountLabel, allVotersVoted, AUTO_REVEAL_SECONDS, HEARTBEAT_MS, SWEEP_MS } from './poker-core.js?v=__VERSION__';
 
 const PSEUDO_STORAGE_KEY = 'poker-planning.pseudo';
@@ -304,6 +305,7 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
     // Courte vibration à la révélation (téléphones qui le permettent), jamais au premier rendu.
     if (wasRevealed === false && view.revealed) {
       try { navigator.vibrate?.(150); } catch { /* API absente ou refusée */ }
+      if (view.results?.consensus) launchConfetti();
     }
     wasRevealed = view.revealed;
 
