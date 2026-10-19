@@ -133,9 +133,11 @@ export function buildRoomView(raw, myUid, now = Date.now()) {
     results = {
       ...computeResults(voters.map((p) => p.vote)),
       extremes: computeExtremes(voters),
+      gap: null,
       questionPseudos: voters.filter((p) => p.vote === '?').map((p) => p.pseudo)
         .sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' })),
     };
+    results.gap = computeGap(results.extremes);
     for (const p of participants) {
       p.extreme = !results.extremes || p.vote === null ? null
         : p.vote === results.extremes.low.value ? 'low'
@@ -195,6 +197,33 @@ export function isInactive(participant, now) {
 }
 
 // ---------------------------------------------------------------- Résultats
+
+/** Échelle des cartes chiffrées, pour compter les crans d'écart. */
+export const NUMERIC_SCALE = Object.freeze(CARDS.map((c) => c.value).filter(isNumericCard));
+/** Écart à partir duquel les deux camps sont invités à s'expliquer. */
+export const GAP_MIN_STEPS = 2;
+
+/** Nombre de crans entre deux cartes chiffrées sur l'échelle 0, 1, 2, 3, 5, 8. */
+export function stepsBetween(a, b) {
+  return Math.abs(NUMERIC_SCALE.indexOf(b) - NUMERIC_SCALE.indexOf(a));
+}
+
+/** Écart important entre le vote le plus bas et le plus haut, ou null. */
+export function computeGap(extremes) {
+  if (!extremes) return null;
+  const steps = stepsBetween(extremes.low.value, extremes.high.value);
+  return steps >= GAP_MIN_STEPS ? { steps, low: extremes.low, high: extremes.high } : null;
+}
+
+/** Textes de l'encadré d'écart : titre et invitation à s'expliquer. */
+export function gapMessage({ steps, low, high }) {
+  const names = (side) => listFormatter.format(side.pseudos);
+  const pronoun = (side) => (side.pseudos.length > 1 ? 'vous' : 'te');
+  return {
+    title: `${steps} crans d'écart entre ${names(low)} (${low.value}) et ${names(high)} (${high.value})`,
+    prompt: `${names(low)}, qu'est-ce qui ${pronoun(low)} paraît plus simple ? ${names(high)}, qu'est-ce qui ${pronoun(high)} paraît plus compliqué ?`,
+  };
+}
 
 /**
  * Votes chiffrés extrêmes, avec les pseudos de ceux qui les ont joués.

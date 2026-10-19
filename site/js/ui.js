@@ -2,7 +2,7 @@
 // et ne contient aucune règle métier : tout calcul passe par poker-core.js.
 
 import { launchConfetti } from './confetti.js?v=__VERSION__';
-import { CARDS, MESSAGES, validatePseudo, buildRoomView, cardByValue, voteCountLabel, allVotersVoted, AUTO_REVEAL_SECONDS, questionMessage, HEARTBEAT_MS, SWEEP_MS } from './poker-core.js?v=__VERSION__';
+import { CARDS, MESSAGES, validatePseudo, buildRoomView, cardByValue, voteCountLabel, allVotersVoted, AUTO_REVEAL_SECONDS, questionMessage, gapMessage, HEARTBEAT_MS, SWEEP_MS } from './poker-core.js?v=__VERSION__';
 
 const PSEUDO_STORAGE_KEY = 'poker-planning.pseudo';
 const ROLE_STORAGE_KEY = 'poker-planning.role';
@@ -397,6 +397,12 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
           value.textContent = extremes[side].value;
           $(`extreme-${side}`).replaceChildren(value, extremes[side].pseudos.join(', '));
         }
+      }
+      $('gap').hidden = !results.gap;
+      if (results.gap) {
+        const { title, prompt } = gapMessage(results.gap);
+        $('gap-title').textContent = title;
+        $('gap-prompt').textContent = prompt;
       }
       $('consensus').hidden = results.consensus === null;
       $('consensus').textContent = results.consensus === null ? '' : `Consensus : ${results.consensus}`;

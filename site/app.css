@@ -421,6 +421,10 @@ main { max-width: 960px; margin: 0 auto; padding: 0 16px 32px; }
 
 .notice { margin: 14px 0 0; padding: 10px 12px; border-radius: 10px; font-weight: 650; }
 .notice-success { background: var(--success-bg); color: var(--success-text); }
+.notice-gap { border: 1.5px solid var(--accent); background: var(--accent-soft); color: var(--text); }
+.notice-gap p { margin: 0; }
+.gap-title { font-weight: 750; }
+.gap-prompt { margin-top: 4px !important; font-weight: 500; }
 .notice-info { background: var(--surface-2); color: var(--text); display: flex; align-items: flex-start; gap: 10px; font-weight: 600; }
 .notice-info .question-mark {
   flex: none; width: 24px; height: 32px; border-radius: 5px;

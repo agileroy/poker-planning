@@ -4,6 +4,7 @@ import {
   CARDS, MESSAGES, validatePseudo, pseudoKey, isNumericCard,
   buildRoomView, computeResults, formatMean, newRoundUpdate,
   INACTIVITY_MS, HEARTBEAT_MS, SWEEP_MS, isInactive, computeExtremes, voteCountLabel, allVotersVoted, AUTO_REVEAL_SECONDS, questionMessage,
+  NUMERIC_SCALE, stepsBetween, computeGap, gapMessage,
 } from '../site/js/poker-core.js';
 
 const here = { c1: true };
@@ -348,4 +349,37 @@ test('aucune question : pas de message', () => {
   const view = revealedWith({ Julie: '3', Marc: '5' });
   assert.deepEqual(view.results.questionPseudos, []);
   assert.equal(questionMessage([]), '');
+});
+
+// ---------------------------------------------------------------- Écart important
+
+test('crans sur l\'échelle 0, 1, 2, 3, 5, 8', () => {
+  assert.deepEqual(NUMERIC_SCALE, ['0', '1', '2', '3', '5', '8']);
+  assert.equal(stepsBetween('1', '3'), 2);
+  assert.equal(stepsBetween('3', '5'), 1);
+  assert.equal(stepsBetween('1', '8'), 4);
+  assert.equal(stepsBetween('0', '2'), 2);
+});
+
+test('deux crans : Julie (1) et Marc (3)', () => {
+  const gap = revealedWith({ Julie: '1', Marc: '3' }).results.gap;
+  assert.equal(gap.steps, 2);
+  assert.deepEqual(gapMessage(gap), {
+    title: "2 crans d'écart entre Julie (1) et Marc (3)",
+    prompt: "Julie, qu'est-ce qui te paraît plus simple ? Marc, qu'est-ce qui te paraît plus compliqué ?",
+  });
+});
+
+test('plusieurs personnes dans un camp : « vous »', () => {
+  const gap = revealedWith({ Julie: '1', Paul: '1', 'Léa': '2', Marc: '8' }).results.gap;
+  assert.deepEqual(gapMessage(gap), {
+    title: "4 crans d'écart entre Julie et Paul (1) et Marc (8)",
+    prompt: "Julie et Paul, qu'est-ce qui vous paraît plus simple ? Marc, qu'est-ce qui te paraît plus compliqué ?",
+  });
+});
+
+test('un seul cran ou pas d\'extrêmes : pas d\'écart', () => {
+  assert.equal(revealedWith({ Julie: '3', Marc: '5' }).results.gap, null);
+  assert.equal(revealedWith({ Julie: '3', Marc: '3' }).results.gap, null);
+  assert.equal(computeGap(null), null);
 });
