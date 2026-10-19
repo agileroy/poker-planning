@@ -224,7 +224,15 @@ main { max-width: 960px; margin: 0 auto; padding: 0 16px 32px; }
 @media (min-width: 760px) {
   .room { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
   .deck-panel { grid-column: 1 / -1; }
+  .room > .results { grid-column: 1 / -1; }
+  .results:has(.results-messages > :not([hidden])) .results-layout {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start;
+  }
+  .results:has(.results-messages > :not([hidden])) .results-messages { margin-top: 0; }
 }
+.results-messages { display: grid; gap: 12px; margin-top: 14px; }
+.results-messages > * { margin: 0 !important; }
+.results-messages:not(:has(> :not([hidden]))) { display: none; }
 
 .side { display: grid; gap: 16px; align-content: start; }
 
@@ -286,9 +294,9 @@ main { max-width: 960px; margin: 0 auto; padding: 0 16px 32px; }
   .join-card { display: none !important; }
   /* Téléphone : les cartes à portée de pouce, puis les résultats, puis la liste des présents. */
   .room > .deck-panel { order: 1; }
-  .room > .side { order: 2; }
+  .room > .results { order: 2; }
   .room > .participants-panel { order: 3; }
-  .room > .side:has(#results[hidden]) { display: none; }
+  .room > .side { display: none; }
 }
 @media (min-width: 760px) { .share-row { display: none; } }
 
