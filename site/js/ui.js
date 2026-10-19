@@ -289,6 +289,19 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
 
   $('reveal').addEventListener('click', () => view?.canReveal && store.reveal(view.round));
   $('new-round').addEventListener('click', () => view && store.newRound(view.round));
+  $('new-round-big').addEventListener('click', () => view && store.newRound(view.round));
+
+  // Halo de « Nouveau vote » pendant 4 s après la révélation.
+  let haloTimer = null;
+  function highlightNewRound() {
+    clearTimeout(haloTimer);
+    for (const id of ['new-round', 'new-round-big']) $(id).classList.add('is-highlighted');
+    haloTimer = setTimeout(clearHalo, 4000);
+  }
+  function clearHalo() {
+    clearTimeout(haloTimer);
+    for (const id of ['new-round', 'new-round-big']) $(id).classList.remove('is-highlighted');
+  }
 
   // ---------------------------------------------------------------- Rendu
 
@@ -305,6 +318,7 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
     // Courte vibration à la révélation (téléphones qui le permettent), jamais au premier rendu.
     if (wasRevealed === false && view.revealed) {
       try { navigator.vibrate?.(150); } catch { /* API absente ou refusée */ }
+      highlightNewRound();
       if (view.results?.consensus) launchConfetti();
     }
     wasRevealed = view.revealed;
@@ -361,8 +375,16 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
     const observing = Boolean(view.me?.observer);
     $('role-voter').setAttribute('aria-checked', String(!observing));
     $('role-observer').setAttribute('aria-checked', String(observing));
-    deck.hidden = observing;
-    $('observer-note').hidden = !observing;
+    // Étape suivante mise en valeur : « Révéler » pendant le vote, « Nouveau vote » après.
+    $('screen-room').classList.toggle('is-revealed', view.revealed);
+    $('reveal').classList.toggle('button-primary', !view.revealed);
+    $('reveal').classList.toggle('button-ghost', view.revealed);
+    $('new-round').classList.toggle('button-primary', view.revealed);
+    $('new-round').classList.toggle('button-ghost', !view.revealed);
+    if (!view.revealed) clearHalo();
+    $('relaunch').hidden = !view.revealed;
+    deck.hidden = observing || view.revealed;
+    $('observer-note').hidden = !observing || view.revealed;
 
     // Cartes
     for (const button of deck.children) {
@@ -370,6 +392,7 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
       button.setAttribute('aria-pressed', String(selected));
       button.disabled = !view.canVote;
     }
+    $('deck-hint').hidden = view.revealed;
     $('deck-hint').textContent = observing ? '' : view.revealed
       ? 'Cartes révélées : votes figés jusqu\'au prochain « Nouveau vote ».'
       : view.myVote !== null ? 'Recliquez sur votre carte pour retirer votre vote.' : '';
