@@ -48,12 +48,22 @@ Un bouton « Révéler », accessible à tous les participants, SHALL retourner 
 - **THEN** le bouton « Révéler » est désactivé
 
 ### Requirement: Nouveau vote
-Un bouton « Nouveau vote », accessible à tous les participants, SHALL remettre à zéro les votes de tous les participants et masquer à nouveau les cartes, pour tout le monde en même temps. Les cartes du jeu SHALL redevenir sélectionnables.
+Un bouton « Nouveau vote », accessible à tous les participants, SHALL remettre à zéro les votes de tous les participants et masquer à nouveau les cartes, pour tout le monde en même temps. Les votes du tour précédent MUST être effacés de la base, y compris ceux des participants absents, et aucun d'eux MUST NOT réapparaître dans le nouveau tour. Les cartes du jeu SHALL redevenir sélectionnables.
 
 #### Scenario: Nouveau tour
 - **GIVEN** des cartes révélées
 - **WHEN** Marc clique sur « Nouveau vote »
 - **THEN** tous les participants voient la liste sans aucune carte, et peuvent voter à nouveau
+
+#### Scenario: Votes effacés
+- **GIVEN** Julie qui a voté 3 puis rechargé sa page, cartes révélées
+- **WHEN** Marc clique sur « Nouveau vote » et Julie revient dans la salle
+- **THEN** Julie n'a aucune carte sélectionnée et apparaît sans vote
+
+#### Scenario: Vote tardif de l'ancien tour
+- **GIVEN** des cartes non révélées et Julie qui clique sur 5 au moment même où Marc clique sur « Nouveau vote »
+- **WHEN** les deux écritures arrivent à la base
+- **THEN** le nouveau tour démarre sans aucun vote, et Julie voit sa carte désélectionnée
 
 ### Requirement: Arrivées et départs pendant un tour
 Un participant qui quitte la salle SHALL voir son vote retiré de la liste, des résultats et du décompte des votants. Un participant qui arrive pendant un tour non révélé SHALL pouvoir voter. Un participant qui arrive après la révélation SHALL voir les cartes révélées et attendre le prochain « Nouveau vote » pour voter.
