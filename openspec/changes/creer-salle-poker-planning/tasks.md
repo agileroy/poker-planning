@@ -17,6 +17,7 @@
 - [x] 3.3 Vérifier l'affichage sur téléphone (390 px) et en thème sombre. Vérification : captures sans défilement horizontal.
 
 - [x] 3.4 Ajouter le bouton de thème clair / sombre (spec « Choix du thème clair ou sombre ») : suit le système par défaut, choix mémorisé et appliqué avant l'affichage, libellé accessible. Vérification : essais automatisés de bascule et de mémorisation, captures dans les deux thèmes.
+- [x] 3.5 Ajouter le bouton « Quitter » (spec « Quitter la salle ») : retrait immédiat de la présence, du vote non révélé et de la réservation du pseudo, tentative de fermeture de l'onglet, sinon écran « Vous avez quitté la salle » avec retour. Vérification : essai automatisé à deux navigateurs.
 
 ## 4. Vérification et publication
 

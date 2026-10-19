@@ -26,6 +26,7 @@ export function createRoomStore(firebaseConfig) {
   let lastRoom = null;
   let entered = false;
   let connected = false;
+  const myConnections = [];
 
   /** Connexion anonyme : l'identifiant est conservé par le navigateur (rechargements, onglets). */
   function start() {
@@ -61,6 +62,7 @@ export function createRoomStore(firebaseConfig) {
   async function openPresence() {
     // Une entrée par onglet ; Firebase la retire si l'onglet se ferme ou perd le réseau.
     const connectionRef = push(ref(db, `${ROOM}/participants/${uid}/connections`));
+    myConnections.push(connectionRef);
     await onDisconnect(connectionRef).remove();
     await set(connectionRef, true);
   }
@@ -115,8 +117,19 @@ export function createRoomStore(firebaseConfig) {
     return update(ref(db, ROOM), newRoundUpdate(round)).then(() => true, () => false);
   }
 
+  /** Quitte la salle : retire la présence (tous les onglets), le vote non révélé et la réservation du pseudo. */
+  async function leave(pseudo) {
+    entered = false;
+    await Promise.all(myConnections.splice(0).map((connectionRef) => onDisconnect(connectionRef).cancel().catch(() => {})));
+    await Promise.all([
+      remove(ref(db, `${ROOM}/participants/${uid}`)),
+      clearVote(), // refusé après révélation : le vote d'un absent n'est de toute façon plus compté
+      pseudo ? remove(ref(db, `${ROOM}/pseudos/${pseudoKey(pseudo)}`)).catch(() => {}) : null,
+    ]);
+  }
+
   return {
-    start, onRoom, onConnection, claimPseudo, enter, changePseudo, vote, clearVote, reveal, newRound,
+    start, onRoom, onConnection, claimPseudo, enter, changePseudo, vote, clearVote, reveal, newRound, leave,
     get uid() { return uid; },
   };
 }

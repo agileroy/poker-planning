@@ -60,6 +60,19 @@ La salle SHALL afficher la liste des participants présents, triée par ordre al
 - **WHEN** Léa ferme son onglet
 - **THEN** Léa disparaît de la liste de Julie et de Marc
 
+### Requirement: Quitter la salle
+La salle SHALL proposer un bouton « Quitter ». Il SHALL retirer immédiatement le participant de la liste des présents de tous les participants, retirer son vote si les cartes ne sont pas révélées, et libérer son pseudo. Il SHALL ensuite demander au navigateur de fermer l'onglet. Les navigateurs n'autorisant cette fermeture que dans certains cas (onglet ouvert par un script, ou onglet sans autre page dans son historique), l'onglet SHALL, s'il reste ouvert, afficher « Vous avez quitté la salle » avec un bouton « Revenir dans la salle ». Le pseudo SHALL rester mémorisé dans le navigateur pour le retour.
+
+#### Scenario: Quitter la salle
+- **GIVEN** Julie et Marc dans la salle, Marc ayant voté 5, cartes non révélées
+- **WHEN** Marc clique sur « Quitter »
+- **THEN** Marc disparaît aussitôt de la liste de Julie, son vote n'est plus compté, et chez Marc l'onglet se ferme ou affiche « Vous avez quitté la salle »
+
+#### Scenario: Retour après avoir quitté
+- **GIVEN** l'écran « Vous avez quitté la salle » chez Marc
+- **WHEN** il clique sur « Revenir dans la salle »
+- **THEN** il revient dans la salle sous le pseudo « Marc », sans le ressaisir
+
 ### Requirement: Rechargement et onglets multiples
 Recharger la page MUST NOT faire perdre au participant son pseudo ni son vote du tour en cours. Plusieurs onglets ouverts dans le même navigateur SHALL représenter un seul participant, présent tant qu'au moins un onglet est ouvert.
 

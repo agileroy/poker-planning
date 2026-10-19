@@ -28,7 +28,7 @@ function cardContent(value) {
 }
 
 function showScreen(name) {
-  for (const id of ['screen-status', 'screen-pseudo', 'screen-room']) {
+  for (const id of ['screen-status', 'screen-pseudo', 'screen-room', 'screen-left']) {
     $(id).hidden = id !== `screen-${name}`;
   }
 }
@@ -127,6 +127,18 @@ export async function startApp(store) {
   $('pseudo-cancel').addEventListener('click', () => {
     showScreen('room');
   });
+
+  $('leave').addEventListener('click', async () => {
+    const leaving = pseudo;
+    pseudo = null;            // plus aucun rendu de la salle
+    $('me').hidden = true;
+    showScreen('left');
+    await store.leave(leaving);
+    // Accepté seulement si l'onglet a été ouvert par un script ; sinon l'écran « quitté » reste affiché.
+    window.close();
+  });
+
+  $('rejoin').addEventListener('click', () => location.reload());
 
   $('change-pseudo').addEventListener('click', () =>
     openPseudoForm({ value: pseudo ?? '', cancellable: true }));

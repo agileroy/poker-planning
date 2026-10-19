@@ -28,6 +28,7 @@
       <div class="me" id="me" hidden>
         <span class="me-name" id="me-name"></span>
         <button type="button" class="link-button" id="change-pseudo">Changer de pseudo</button>
+        <button type="button" class="button button-ghost button-small" id="leave">Quitter</button>
       </div>
       <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Passer en thème sombre" title="Passer en thème sombre">
         <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
@@ -56,6 +57,15 @@
           <button type="submit" class="button button-primary" id="pseudo-submit">Entrer dans la salle</button>
         </div>
       </form>
+    </section>
+
+    <!-- Après « Quitter », si le navigateur refuse de fermer l'onglet -->
+    <section class="screen" id="screen-left" hidden>
+      <div class="left-card">
+        <h2>Vous avez quitté la salle</h2>
+        <p>Vous pouvez fermer cet onglet.</p>
+        <button type="button" class="button button-primary" id="rejoin">Revenir dans la salle</button>
+      </div>
     </section>
 
     <!-- Salle -->
