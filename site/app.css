@@ -1,5 +1,5 @@
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   --bg: #f4efe6;
   --surface: #fffdf8;
   --surface-2: #efe8db;
@@ -22,27 +22,26 @@
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #141917;
-    --surface: #1c2320;
-    --surface-2: #252e2a;
-    --text: #e9efe9;
-    --muted: #a1ada7;
-    --border: #33403a;
-    --accent: #7cc2a9;
-    --accent-text: #0f1513;
-    --accent-soft: #23362f;
-    --success-bg: #1d3a28;
-    --success-text: #a9e2bb;
-    --warning-bg: #3d2e12;
-    --warning-text: #f5cf8e;
-    --error: #ff8a80;
-    --card-face: #232b28;
-    --card-back-a: #3d7464;
-    --card-back-b: #2f5d50;
-    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 14px rgb(0 0 0 / 0.3);
-  }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #141917;
+  --surface: #1c2320;
+  --surface-2: #252e2a;
+  --text: #e9efe9;
+  --muted: #a1ada7;
+  --border: #33403a;
+  --accent: #7cc2a9;
+  --accent-text: #0f1513;
+  --accent-soft: #23362f;
+  --success-bg: #1d3a28;
+  --success-text: #a9e2bb;
+  --warning-bg: #3d2e12;
+  --warning-text: #f5cf8e;
+  --error: #ff8a80;
+  --card-face: #232b28;
+  --card-back-a: #3d7464;
+  --card-back-b: #2f5d50;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 14px rgb(0 0 0 / 0.3);
 }
 
 * { box-sizing: border-box; }
@@ -84,6 +83,24 @@ button { font: inherit; color: inherit; }
   box-shadow: inset 0 0 0 2px var(--card-face);
   border: 1px solid var(--card-back-a);
 }
+
+.topbar-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+.theme-toggle {
+  flex: none;
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.theme-toggle:hover { background: var(--surface-2); }
+.theme-toggle svg { width: 20px; height: 20px; }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
 
 .me { display: flex; align-items: center; gap: 12px; color: var(--muted); }
 .me-name { font-weight: 650; color: var(--text); overflow-wrap: anywhere; }

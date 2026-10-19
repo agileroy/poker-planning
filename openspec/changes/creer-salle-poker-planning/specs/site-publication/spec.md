@@ -9,12 +9,25 @@ Le site SHALL être publié sur GitHub Pages, à l'adresse https://vinchou59.git
 - **THEN** le job de tests échoue et le site publié reste la version précédente
 
 ### Requirement: Interface et appareils
-L'interface SHALL être en français. Elle SHALL être utilisable sur ordinateur et sur téléphone (largeur de 360 px et plus) sans défilement horizontal, en thème clair et en thème sombre selon le réglage du système. Le site MUST NOT afficher de publicité ni charger de traceur.
+L'interface SHALL être en français. Elle SHALL être utilisable sur ordinateur et sur téléphone (largeur de 360 px et plus) sans défilement horizontal, en thème clair et en thème sombre. Le site MUST NOT afficher de publicité ni charger de traceur.
 
 #### Scenario: Affichage sur téléphone
 - **GIVEN** un téléphone de 390 px de large
 - **WHEN** un participant ouvre la salle
 - **THEN** la liste des présents, les cartes et les boutons s'affichent sans défilement horizontal
+
+### Requirement: Choix du thème clair ou sombre
+Par défaut, le thème SHALL suivre le réglage du système. Un bouton, visible sur tous les écrans (pseudo et salle), SHALL basculer entre thème clair et thème sombre ; son libellé accessible SHALL indiquer le thème vers lequel il bascule (« Passer en thème sombre » ou « Passer en thème clair »). Le choix SHALL être mémorisé dans le navigateur et appliqué dès l'affichage de la page, sans clignotement du thème par défaut. Ce choix est propre à chaque participant et MUST NOT être partagé avec la salle.
+
+#### Scenario: Bascule vers le thème sombre
+- **GIVEN** un système en thème clair et aucun choix mémorisé
+- **WHEN** le participant clique sur le bouton de thème
+- **THEN** la page passe en thème sombre et le bouton propose « Passer en thème clair »
+
+#### Scenario: Choix mémorisé
+- **GIVEN** un participant qui a choisi le thème sombre
+- **WHEN** il recharge la page avec un système en thème clair
+- **THEN** la page s'affiche directement en thème sombre
 
 ### Requirement: Connexion au service temps réel
 Le site SHALL n'utiliser que des connexions HTTPS vers Firebase, compatibles avec un VPN d'entreprise. Si le service temps réel est injoignable ou que la connexion est perdue, la salle SHALL afficher un message « Connexion perdue, reconnexion… » et reprendre automatiquement à son retour, sans recharger la page.
