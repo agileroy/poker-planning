@@ -172,6 +172,25 @@ export function questionMessage(pseudos) {
     : { title: `${listFormatter.format(pseudos)} ont joué « ? »`, text: 'Prenez le temps de clarifier la story avec eux.' };
 }
 
+/** Nombre minimal de votants et part de votes à partir desquels les retardataires sont nommés. */
+export const WAITING_MIN_VOTERS = 4;
+export const WAITING_MIN_RATIO = 0.75;
+
+/** Pseudos des votants présents encore sans vote, quand il est utile de les nommer ; sinon liste vide. */
+export function waitingFor(view) {
+  if (view.revealed) return [];
+  const voters = view.participants.filter((p) => !p.observer);
+  const missing = voters.filter((p) => !p.hasVoted);
+  const ratio = voters.length ? (voters.length - missing.length) / voters.length : 0;
+  if (voters.length < WAITING_MIN_VOTERS || ratio < WAITING_MIN_RATIO || missing.length === 0) return [];
+  return missing.map((p) => p.pseudo).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
+}
+
+/** « En attente de Paul », « En attente de Léa et Paul ». */
+export function waitingMessage(pseudos) {
+  return `En attente de ${listFormatter.format(pseudos)}`;
+}
+
 /** Révélation automatique possible : cartes cachées et chaque votant présent (hors observateurs) a voté. */
 export function allVotersVoted(view) {
   const voters = view.participants.filter((p) => !p.observer);

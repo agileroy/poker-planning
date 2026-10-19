@@ -5,6 +5,7 @@ import {
   buildRoomView, computeResults, formatMean, newRoundUpdate,
   INACTIVITY_MS, HEARTBEAT_MS, SWEEP_MS, isInactive, computeExtremes, voteCountLabel, allVotersVoted, AUTO_REVEAL_SECONDS, questionMessage,
   NUMERIC_SCALE, stepsBetween, computeGap, gapMessage,
+  waitingFor, waitingMessage,
 } from '../site/js/poker-core.js';
 
 const here = { c1: true };
@@ -385,4 +386,38 @@ test('un seul cran ou pas d\'extrêmes : pas d\'écart', () => {
   assert.equal(revealedWith({ Julie: '3', Marc: '5' }).results.gap, null);
   assert.equal(revealedWith({ Julie: '3', Marc: '3' }).results.gap, null);
   assert.equal(computeGap(null), null);
+});
+
+// ---------------------------------------------------------------- Participants attendus
+
+const roomWith = (voted, waiting, { observers = [], revealed = false } = {}) => {
+  const participants = {};
+  const votes = {};
+  for (const name of [...voted, ...waiting, ...observers]) participants[name] = { pseudo: name, connections: here };
+  for (const name of observers) participants[name].observer = true;
+  for (const name of voted) votes[name] = { value: '3', round: 1 };
+  return buildRoomView({ state: { round: 1, revealed }, participants, votes }, voted[0] ?? waiting[0]);
+};
+
+test('un retardataire sur cinq : « En attente de Paul »', () => {
+  const w = waitingFor(roomWith(['Julie', 'Léa', 'Marc', 'Rémi'], ['Paul']));
+  assert.deepEqual(w, ['Paul']);
+  assert.equal(waitingMessage(w), 'En attente de Paul');
+});
+
+test('seuil de 75 % : 3 sur 4 suffit, 3 sur 5 non', () => {
+  assert.deepEqual(waitingFor(roomWith(['Julie', 'Léa', 'Marc'], ['Paul'])), ['Paul']);
+  assert.deepEqual(waitingFor(roomWith(['Julie', 'Léa', 'Marc'], ['Paul', 'Rémi'])), []);
+});
+
+test('plusieurs retardataires triés', () => {
+  const w = waitingFor(roomWith(['A', 'B', 'C', 'D', 'E', 'F'], ['Paul', 'Léa']));
+  assert.deepEqual(w, ['Léa', 'Paul']);
+  assert.equal(waitingMessage(w), 'En attente de Léa et Paul');
+});
+
+test('trop peu de votants (observateurs exclus), tout le monde a voté, ou révélé : rien', () => {
+  assert.deepEqual(waitingFor(roomWith(['Julie', 'Marc'], ['Paul'], { observers: ['Léa'] })), []);
+  assert.deepEqual(waitingFor(roomWith(['Julie', 'Léa', 'Marc', 'Paul'], [])), []);
+  assert.deepEqual(waitingFor(roomWith(['Julie', 'Léa', 'Marc', 'Rémi'], ['Paul'], { revealed: true })), []);
 });
