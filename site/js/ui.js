@@ -49,7 +49,8 @@ export async function startApp(store) {
 
   try {
     await store.start();
-  } catch {
+  } catch (error) {
+    console.error('Connexion Firebase refusée :', error?.code ?? error);
     showFatal('Impossible de se connecter au service temps réel. Vérifiez votre connexion, puis rechargez la page.');
     return;
   }
