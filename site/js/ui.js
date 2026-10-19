@@ -423,9 +423,10 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
       }
       $('gap').hidden = !results.gap;
       if (results.gap) {
-        const { title, prompt } = gapMessage(results.gap);
+        const { title, simpler, harder } = gapMessage(results.gap);
         $('gap-title').textContent = title;
-        $('gap-prompt').textContent = prompt;
+        $('gap-simpler').textContent = simpler;
+        $('gap-harder').textContent = harder;
       }
       $('consensus').hidden = results.consensus === null;
       $('consensus').textContent = results.consensus === null ? '' : `Consensus : ${results.consensus}`;

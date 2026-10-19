@@ -365,16 +365,19 @@ test('deux crans : Julie (1) et Marc (3)', () => {
   const gap = revealedWith({ Julie: '1', Marc: '3' }).results.gap;
   assert.equal(gap.steps, 2);
   assert.deepEqual(gapMessage(gap), {
-    title: "2 crans d'écart entre Julie (1) et Marc (3)",
-    prompt: "Julie, qu'est-ce qui te paraît plus simple ? Marc, qu'est-ce qui te paraît plus compliqué ?",
+    title: 'Julie (1) et Marc (3) ne voient pas la story de la même façon',
+    simpler: "Julie, qu'est-ce qui te paraît plus simple ?",
+    harder: "Marc, qu'est-ce qui te paraît plus compliqué ?",
   });
 });
 
 test('plusieurs personnes dans un camp : « vous »', () => {
   const gap = revealedWith({ Julie: '1', Paul: '1', 'Léa': '2', Marc: '8' }).results.gap;
+  assert.equal(gap.steps, 4);
   assert.deepEqual(gapMessage(gap), {
-    title: "4 crans d'écart entre Julie et Paul (1) et Marc (8)",
-    prompt: "Julie et Paul, qu'est-ce qui vous paraît plus simple ? Marc, qu'est-ce qui te paraît plus compliqué ?",
+    title: 'Julie et Paul (1) et Marc (8) ne voient pas la story de la même façon',
+    simpler: "Julie et Paul, qu'est-ce qui vous paraît plus simple ?",
+    harder: "Marc, qu'est-ce qui te paraît plus compliqué ?",
   });
 });
 

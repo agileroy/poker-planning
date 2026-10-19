@@ -215,13 +215,14 @@ export function computeGap(extremes) {
   return steps >= GAP_MIN_STEPS ? { steps, low: extremes.low, high: extremes.high } : null;
 }
 
-/** Textes de l'encadré d'écart : titre et invitation à s'expliquer. */
-export function gapMessage({ steps, low, high }) {
+/** Textes de l'encadré d'écart : titre, puis une question par camp. */
+export function gapMessage({ low, high }) {
   const names = (side) => listFormatter.format(side.pseudos);
   const pronoun = (side) => (side.pseudos.length > 1 ? 'vous' : 'te');
   return {
-    title: `${steps} crans d'écart entre ${names(low)} (${low.value}) et ${names(high)} (${high.value})`,
-    prompt: `${names(low)}, qu'est-ce qui ${pronoun(low)} paraît plus simple ? ${names(high)}, qu'est-ce qui ${pronoun(high)} paraît plus compliqué ?`,
+    title: `${names(low)} (${low.value}) et ${names(high)} (${high.value}) ne voient pas la story de la même façon`,
+    simpler: `${names(low)}, qu'est-ce qui ${pronoun(low)} paraît plus simple ?`,
+    harder: `${names(high)}, qu'est-ce qui ${pronoun(high)} paraît plus compliqué ?`,
   };
 }
 
