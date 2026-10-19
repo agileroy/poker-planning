@@ -6,7 +6,7 @@ import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gsta
 import {
   getDatabase, ref, onValue, push, set, update, remove, onDisconnect, runTransaction,
 } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js';
-import { pseudoKey, newRoundUpdate } from './poker-core.js';
+import { pseudoKey, newRoundUpdate } from './poker-core.js?v=__VERSION__';
 
 const ROOM = 'room';
 

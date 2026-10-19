@@ -1,7 +1,7 @@
 // Interface de la salle. Reçoit un « store » (Firebase en production, factice pour les essais)
 // et ne contient aucune règle métier : tout calcul passe par poker-core.js.
 
-import { CARDS, MESSAGES, validatePseudo, buildRoomView, cardByValue } from './poker-core.js';
+import { CARDS, MESSAGES, validatePseudo, buildRoomView, cardByValue } from './poker-core.js?v=__VERSION__';
 
 const PSEUDO_STORAGE_KEY = 'poker-planning.pseudo';
 
