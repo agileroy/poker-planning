@@ -30,7 +30,7 @@ Site statique (HTML/CSS/JavaScript, sans build) publié sur GitHub Pages ; l'ét
 - `site/js/ui.js` : interface ; `site/js/app.js` : point d'entrée ;
 - `site/js/firebase-config.js` : configuration web Firebase (publique par nature) ;
 - `site/vendor/` : générateur de QR code `qrcode-generator` 1.4.4 (licence MIT) ;
-- `database.rules.json` : règles de sécurité de la base, à publier dans la console Firebase après chaque modification.
+- `database.rules.json` : règles de sécurité de la base, à publier dans la console Firebase après chaque modification. La base est partagée avec [matrice-competences](https://github.com/vinchou59/matrice-competences) (branche `skillMatrix`) : garder ce fichier identique dans les deux dépôts.
 
 ## Développement
 
