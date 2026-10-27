@@ -30,7 +30,7 @@ Site statique (HTML/CSS/JavaScript, sans build) publié sur GitHub Pages ; l'ét
 - `site/js/ui.js` : interface ; `site/js/app.js` : point d'entrée ;
 - `site/js/firebase-config.js` : configuration web Firebase (publique par nature) ;
 - `site/vendor/` : générateur de QR code `qrcode-generator` 1.4.4 (licence MIT) ;
-- `database.rules.json` : règles de sécurité de la base, à publier dans la console Firebase après chaque modification. La base est partagée avec [matrice-competences](https://github.com/vinchou59/matrice-competences) (branche `skillMatrix`) et [wheel-of-chance](https://github.com/vinchou59/wheel-of-chance) (branche `wheelOfChance`) : garder ce fichier identique dans les trois dépôts.
+- `database.rules.json` : règles de sécurité de la base, à publier dans la console Firebase après chaque modification. La base est partagée avec [matrice-competences](https://github.com/vinchou59/matrice-competences) (branche `skillMatrix`) [wheel-of-chance](https://github.com/vinchou59/wheel-of-chance) (branche `wheelOfChance`) et [moving-motivators](https://github.com/vinchou59/moving-motivators) (branche `movingMotivators`) : garder ce fichier identique dans les quatre dépôts.
 
 ## Développement
 
