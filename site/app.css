@@ -296,7 +296,7 @@ main { max-width: 960px; margin: 0 auto; padding: 0 16px 32px; }
   .room > .deck-panel { order: 1; }
   .room > .results { order: 2; }
   .room > .participants-panel { order: 3; }
-  .room > .side { display: none; }
+  .room > .side { order: 4; }
 }
 @media (min-width: 760px) { .share-row { display: none; } }
 
@@ -382,15 +382,23 @@ main { max-width: 960px; margin: 0 auto; padding: 0 16px 32px; }
   font-weight: 600;
 }
 
-.participant-tag {
-  margin-left: 8px;
-  padding: 1px 8px;
+.participants-empty { margin: 0 0 16px; padding: 8px 0; color: var(--muted); }
+
+/* Observateurs : à part, sous le QR code (écran large) ou après les présents (téléphone). */
+.observers { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.observer-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  max-width: 100%;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--surface-2);
-  color: var(--muted);
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.925rem;
+  overflow-wrap: anywhere;
 }
+.observer-chip svg { flex: none; color: var(--muted); }
+.observer-chip .participant-you { margin-left: 0; }
+
 .deck {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

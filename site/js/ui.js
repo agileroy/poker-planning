@@ -16,6 +16,16 @@ function storeRole(role) {
 
 const $ = (id) => document.getElementById(id);
 
+const EYE_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+
+/** Mention « (vous) » à côté de son propre pseudo. */
+function youTag() {
+  const you = document.createElement('span');
+  you.className = 'participant-you';
+  you.textContent = '(vous)';
+  return you;
+}
+
 function readStoredPseudo() {
   try { return localStorage.getItem(PSEUDO_STORAGE_KEY) ?? ''; } catch { return ''; }
 }
@@ -323,28 +333,15 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
     }
     wasRevealed = view.revealed;
 
-    // Présents
+    // Présents : uniquement les participants qui votent.
     const list = $('participants');
-    list.replaceChildren(...view.participants.map((p) => {
+    list.replaceChildren(...view.voters.map((p) => {
       const item = document.createElement('li');
       item.className = 'participant';
       const name = document.createElement('span');
       name.className = 'participant-name';
       name.textContent = p.pseudo;
-      if (p.isMe) {
-        const you = document.createElement('span');
-        you.className = 'participant-you';
-        you.textContent = '(vous)';
-        name.append(you);
-      }
-      if (p.observer) {
-        const tag = document.createElement('span');
-        tag.className = 'participant-tag';
-        tag.textContent = 'observateur';
-        name.append(tag);
-        item.append(name);
-        return item;
-      }
+      if (p.isMe) name.append(youTag());
       const mini = document.createElement('span');
       mini.className = 'mini-card';
       if (view.revealed && p.vote !== null) {
@@ -366,6 +363,19 @@ export async function startApp(store, { sweepMs = SWEEP_MS, heartbeatMs = HEARTB
         mini.setAttribute('aria-label', 'pas encore voté');
       }
       item.append(name, mini);
+      return item;
+    }));
+    $('no-voter').hidden = view.voters.length > 0;
+
+    // Observateurs : encadré à part, masqué s'il n'y en a pas.
+    $('observers-panel').hidden = view.observers.length === 0;
+    $('observer-count').textContent = String(view.observers.length);
+    $('observers').replaceChildren(...view.observers.map((p) => {
+      const item = document.createElement('li');
+      item.className = 'observer-chip';
+      item.innerHTML = EYE_ICON;
+      item.append(p.pseudo);
+      if (p.isMe) item.append(youTag());
       return item;
     }));
 

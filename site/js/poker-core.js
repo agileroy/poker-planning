@@ -150,6 +150,8 @@ export function buildRoomView(raw, myUid, now = Date.now()) {
     revealed,
     autoReveal: raw?.settings?.autoReveal === true,
     participants,
+    voters: participants.filter((p) => !p.observer),
+    observers: participants.filter((p) => p.observer),
     me,
     myVote: me ? me.vote : voteOf(myUid),
     voteCount: voters.length,

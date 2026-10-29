@@ -421,3 +421,18 @@ test('trop peu de votants (observateurs exclus), tout le monde a voté, ou rév�
   assert.deepEqual(waitingFor(roomWith(['Julie', 'Léa', 'Marc', 'Paul'], [])), []);
   assert.deepEqual(waitingFor(roomWith(['Julie', 'Léa', 'Marc', 'Rémi'], ['Paul'], { revealed: true })), []);
 });
+
+test('votants et observateurs séparés, chacun par ordre alphabétique', () => {
+  const view = buildRoomView(room({
+    participants: {
+      uPaul: { pseudo: 'Paul', connections: here, observer: true },
+      uMarc: { pseudo: 'Marc', connections: here },
+      uLea: { pseudo: 'Léa', connections: here, observer: true },
+      uJulie: { pseudo: 'Julie', connections: here },
+    },
+  }), 'uMarc');
+  assert.deepEqual(view.voters.map((p) => p.pseudo), ['Julie', 'Marc']);
+  assert.deepEqual(view.observers.map((p) => p.pseudo), ['Léa', 'Paul']);
+  assert.equal(view.participants.length, 4);
+  assert.deepEqual(buildRoomView(room(), 'uJulie').observers, []);
+});
