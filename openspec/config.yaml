@@ -6,7 +6,7 @@ context: |
   Outil de poker planning pour l'équipe de l'auteur, sans publicité, dépôt public.
   Jeu de cartes : ?, 0, 1, 2, 3, 5, 8 et une carte « ciseaux » (image).
   Les votes d'un participant ne doivent jamais être visibles des autres avant la révélation.
-  Hébergement : site statique sur GitHub Pages (https://vinchou59.github.io/poker-planning/), sans serveur à maintenir.
+  Hébergement : site statique sur GitHub Pages (https://agileroy.github.io/poker-planning/), sans serveur à maintenir.
   Temps réel : Firebase (offre gratuite) partage l'état des salles entre les navigateurs ;
   aucun autre service tiers. N'utiliser que HTTPS (port 443), pas de connexion directe entre navigateurs (WebRTC).
   Le VPN de l'entreprise (proxy Zscaler) bloque GitHub Pages et Firebase : les participants rejoignent depuis
