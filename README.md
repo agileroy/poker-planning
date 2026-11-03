@@ -30,7 +30,7 @@ Site statique (HTML/CSS/JavaScript, sans build) publié sur GitHub Pages ; l'ét
 - `site/js/ui.js` : interface ; `site/js/app.js` : point d'entrée ;
 - `site/js/firebase-config.js` : configuration web Firebase (publique par nature) ;
 - `site/vendor/` : générateur de QR code `qrcode-generator` 1.4.4 (licence MIT) ;
-- `database.rules.json` : règles de sécurité du projet Firebase `poker-planning-vleroy`, encore partagé avec d'autres outils (une branche par outil ; les outils déplacés dans leur propre projet, comme Fournée, n'y figurent plus). Le fichier doit rester identique dans tous les dépôts qui partagent la base, et **seul ce dépôt le publie** : à chaque push sur `main`, après les tests, le job `rules` du workflow le déploie (Firebase CLI, compte de service du secret `FIREBASE_SERVICE_ACCOUNT`, projet désigné par `firebase.json` et `.firebaserc`). Toute évolution du fichier commun se fait donc ici, puis se recopie dans les autres dépôts.
+- `database.rules.json` : règles de sécurité du projet Firebase `poker-planning-vleroy`, propre au poker planning (les autres outils ont chacun leur projet), limitées à la branche `room`. Elles sont publiées automatiquement à chaque push sur `main`, après les tests, par le job `rules` du workflow (Firebase CLI, compte de service du secret `FIREBASE_SERVICE_ACCOUNT`, projet désigné par `firebase.json` et `.firebaserc`).
 
 ## Développement
 
