@@ -8,6 +8,8 @@ context: |
   Les votes d'un participant ne doivent jamais être visibles des autres avant la révélation.
   Hébergement : site statique sur GitHub Pages (https://agileroy.github.io/poker-planning/), sans serveur à maintenir.
   Temps réel : Firebase (offre gratuite) partage l'état des salles entre les navigateurs ;
+  le projet Firebase poker-planning-vleroy est encore partagé avec d'autres outils (une branche chacun) ;
+  database.rules.json reste identique dans leurs dépôts et seul ce dépôt le publie, par GitHub Actions après les tests ;
   aucun autre service tiers. N'utiliser que HTTPS (port 443), pas de connexion directe entre navigateurs (WebRTC).
   Le VPN de l'entreprise (proxy Zscaler) bloque GitHub Pages et Firebase : les participants rejoignent depuis
   leur téléphone, via le QR code affiché dans la salle.

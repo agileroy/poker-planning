@@ -30,7 +30,7 @@ Site statique (HTML/CSS/JavaScript, sans build) publié sur GitHub Pages ; l'ét
 - `site/js/ui.js` : interface ; `site/js/app.js` : point d'entrée ;
 - `site/js/firebase-config.js` : configuration web Firebase (publique par nature) ;
 - `site/vendor/` : générateur de QR code `qrcode-generator` 1.4.4 (licence MIT) ;
-- `database.rules.json` : règles de sécurité de la base, à publier dans la console Firebase après chaque modification. La base est partagée avec [matrice-competences](https://github.com/agileroy/matrice-competences) (branche `skillMatrix`) [wheel-of-chance](https://github.com/agileroy/wheel-of-chance) (branche `wheelOfChance`) [moving-motivators](https://github.com/agileroy/moving-motivators) (branche `movingMotivators`) et [roles-responsabilites](https://github.com/agileroy/roles-responsabilites) (branche `rolesGame`) : garder ce fichier identique dans les cinq dépôts.
+- `database.rules.json` : règles de sécurité du projet Firebase `poker-planning-vleroy`, encore partagé avec d'autres outils (une branche par outil ; les outils déplacés dans leur propre projet, comme Fournée, n'y figurent plus). Le fichier doit rester identique dans tous les dépôts qui partagent la base, et **seul ce dépôt le publie** : à chaque push sur `main`, après les tests, le job `rules` du workflow le déploie (Firebase CLI, compte de service du secret `FIREBASE_SERVICE_ACCOUNT`, projet désigné par `firebase.json` et `.firebaserc`). Toute évolution du fichier commun se fait donc ici, puis se recopie dans les autres dépôts.
 
 ## Développement
 
@@ -39,7 +39,7 @@ npm test                                          # tests de la logique métier
 python3 -m http.server 8765 --directory site      # puis http://localhost:8765
 ```
 
-Chaque push sur `main` lance les tests puis publie `site/` sur GitHub Pages ; un test en échec bloque la publication.
+Chaque push sur `main` lance les tests, publie les règles de la base puis publie `site/` sur GitHub Pages ; un test en échec bloque les deux publications.
 
 ## Méthode
 
