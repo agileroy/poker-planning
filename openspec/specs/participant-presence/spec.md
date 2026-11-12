@@ -1,25 +1,17 @@
 # Participant Presence Specification
 
 ## Purpose
-Arrivée dans la salle unique, pseudo, liste des présents en temps réel, sortie volontaire et retrait automatique des inactifs. Couvre `site/js/ui.js`, `site/js/room-store.js` et les règles `participants` / `pseudos` de `database.rules.json`.
+Arrivée dans une salle, pseudo, liste des présents en temps réel, sortie volontaire et retrait automatique des inactifs. Couvre `site/js/ui.js`, `site/js/room-store.js` et les règles `participants` / `pseudos` de `database.rules.json`.
 
 ## Requirements
 
-### Requirement: Salle unique
-Le site SHALL proposer une seule salle de poker planning, commune à tous les participants et accessible directement à l'adresse du site. Le site MUST NOT demander de créer une salle, de saisir un code ni de créer un compte.
-
-#### Scenario: Arrivée par le lien
-- **GIVEN** deux personnes qui ouvrent l'adresse du site sur deux ordinateurs différents
-- **WHEN** elles ont choisi leur pseudo
-- **THEN** elles se retrouvent dans la même salle et se voient mutuellement dans la liste des présents
-
 ### Requirement: Rejoindre avec un téléphone
-Sur un écran large (760 px et plus), la salle SHALL afficher en permanence une carte « Rejoindre avec un téléphone » avec un QR code de l'adresse du site (sans paramètre ni ancre) et l'adresse en clair, sans gêner la liste des présents, les cartes ni les résultats. Un clic sur le QR code SHALL l'afficher en grand au centre de l'écran ; la touche Échap, un clic en dehors ou un bouton « Fermer » SHALL le refermer. Le QR code SHALL rester lisible en thème sombre (modules sombres sur fond clair). Sur un écran étroit, le QR code MUST NOT être affiché ; un bouton « Partager le lien » SHALL ouvrir le partage du téléphone, ou à défaut copier l'adresse et le confirmer. Le générateur de QR code SHALL être embarqué dans le site, sans chargement depuis un service externe.
+Sur un écran large (760 px et plus), la salle SHALL afficher en permanence une carte « Rejoindre avec un téléphone » avec un QR code de l'adresse de la salle ouverte et cette adresse en clair, sans gêner la liste des présents, les cartes ni les résultats. Un clic sur le QR code SHALL l'afficher en grand au centre de l'écran ; la touche Échap, un clic en dehors ou un bouton « Fermer » SHALL le refermer. Le QR code SHALL rester lisible en thème sombre (modules sombres sur fond clair). Sur un écran étroit, le QR code MUST NOT être affiché ; un bouton « Partager le lien » SHALL ouvrir le partage du téléphone avec l'adresse de la salle, ou à défaut copier cette adresse et le confirmer. Le générateur de QR code SHALL être embarqué dans le site, sans chargement depuis un service externe.
 
 #### Scenario: Retardataire en réunion
-- **GIVEN** l'animateur qui partage son écran d'ordinateur, salle ouverte
+- **GIVEN** l'animateur qui partage son écran d'ordinateur, salle « Produit » ouverte
 - **WHEN** un retardataire scanne le QR code de la carte « Rejoindre avec un téléphone »
-- **THEN** son téléphone ouvre l'adresse du site et il peut choisir son pseudo
+- **THEN** son téléphone ouvre la salle « Produit », et il peut choisir son pseudo
 
 #### Scenario: QR code agrandi
 - **GIVEN** la salle sur un ordinateur
@@ -45,25 +37,30 @@ Sur un écran large (760 px et plus), la salle SHALL afficher en permanence une 
 - **THEN** il reste sur l'écran avec le message « Choisissez un pseudo de 1 à 20 caractères »
 
 ### Requirement: Pseudo unique dans la salle
-Deux participants présents MUST NOT avoir le même pseudo. La comparaison SHALL ignorer la casse et les espaces de début et de fin. Un pseudo déjà pris SHALL être refusé avec un message demandant d'en choisir un autre. Un pseudo SHALL redevenir disponible dès que son titulaire a quitté la salle.
+Deux participants présents dans la même salle MUST NOT avoir le même pseudo ; le même pseudo SHALL rester possible dans deux salles différentes. La comparaison SHALL ignorer la casse et les espaces de début et de fin. Un pseudo déjà pris SHALL être refusé avec un message demandant d'en choisir un autre. Un pseudo SHALL redevenir disponible dès que son titulaire a quitté la salle.
 
 #### Scenario: Pseudo déjà pris
-- **GIVEN** « Julie » présente dans la salle
-- **WHEN** un autre participant choisit « julie »
+- **GIVEN** « Julie » présente dans la salle « Produit »
+- **WHEN** un autre participant choisit « julie » dans cette salle
 - **THEN** il reste sur l'écran de choix avec le message « Ce pseudo est déjà utilisé, choisissez-en un autre »
+
+#### Scenario: Même pseudo dans une autre salle
+- **GIVEN** « Julie » présente dans la salle « Produit »
+- **WHEN** une autre personne choisit « Julie » dans la salle « Tech »
+- **THEN** elle entre dans la salle « Tech » sous ce pseudo
 
 #### Scenario: Pseudo libéré
 - **GIVEN** « Julie » qui a fermé son onglet
-- **WHEN** un autre participant choisit « Julie »
+- **WHEN** un autre participant choisit « Julie » dans la même salle
 - **THEN** il entre dans la salle sous ce pseudo
 
 ### Requirement: Pseudo mémorisé
-Le pseudo choisi SHALL être mémorisé dans le navigateur. Aux visites suivantes, le participant SHALL entrer directement dans la salle avec ce pseudo, sans le ressaisir. Si le pseudo mémorisé est pris par un autre participant présent, l'écran de choix SHALL s'afficher, prérempli, avec le message de pseudo déjà utilisé. Depuis la salle, le participant SHALL pouvoir changer de pseudo, selon les mêmes règles.
+Le pseudo choisi SHALL être mémorisé dans le navigateur, pour toutes les salles. Aux visites suivantes, dans n'importe quelle salle, le participant SHALL entrer directement avec ce pseudo, sans le ressaisir. Si le pseudo mémorisé est pris par un autre participant présent dans la salle, l'écran de choix SHALL s'afficher, prérempli, avec le message de pseudo déjà utilisé. L'écran de choix SHALL rappeler le nom de la salle. Depuis la salle, le participant SHALL pouvoir changer de pseudo, selon les mêmes règles.
 
 #### Scenario: Retour d'un participant
-- **GIVEN** un participant qui a choisi « Marc » la semaine précédente dans ce navigateur
-- **WHEN** il ouvre l'adresse du site
-- **THEN** il arrive directement dans la salle sous le pseudo « Marc »
+- **GIVEN** un participant qui a choisi « Marc » la semaine précédente dans ce navigateur, dans la salle « Produit »
+- **WHEN** il ouvre la salle « Tech »
+- **THEN** il arrive directement dans la salle « Tech » sous le pseudo « Marc »
 
 #### Scenario: Changement de pseudo
 - **GIVEN** « Marc » dans la salle
@@ -84,7 +81,7 @@ La salle SHALL afficher la liste des participants présents, triée par ordre al
 - **THEN** Léa disparaît de la liste de Julie et de Marc
 
 ### Requirement: Quitter la salle
-La salle SHALL proposer un bouton « Quitter ». Il SHALL retirer immédiatement le participant de la liste des présents de tous les participants, retirer son vote si les cartes ne sont pas révélées, et libérer son pseudo. Il SHALL ensuite demander au navigateur de fermer l'onglet. Les navigateurs n'autorisant cette fermeture que dans certains cas (onglet ouvert par un script, ou onglet sans autre page dans son historique), l'onglet SHALL, s'il reste ouvert, afficher « Vous avez quitté la salle » avec un bouton « Revenir dans la salle ». Le pseudo SHALL rester mémorisé dans le navigateur pour le retour.
+La salle SHALL proposer un bouton « Quitter ». Il SHALL retirer immédiatement le participant de la liste des présents de tous les participants, retirer son vote si les cartes ne sont pas révélées, et libérer son pseudo. Il SHALL ensuite demander au navigateur de fermer l'onglet. Les navigateurs n'autorisant cette fermeture que dans certains cas (onglet ouvert par un script, ou onglet sans autre page dans son historique), l'onglet SHALL, s'il reste ouvert, afficher « Vous avez quitté la salle » avec un bouton « Revenir dans la salle » et un lien « Toutes les salles ». Le pseudo SHALL rester mémorisé dans le navigateur pour le retour.
 
 #### Scenario: Quitter la salle
 - **GIVEN** Julie et Marc dans la salle, Marc ayant voté 5, cartes non révélées
@@ -94,7 +91,7 @@ La salle SHALL proposer un bouton « Quitter ». Il SHALL retirer immédiatement
 #### Scenario: Retour après avoir quitté
 - **GIVEN** l'écran « Vous avez quitté la salle » chez Marc
 - **WHEN** il clique sur « Revenir dans la salle »
-- **THEN** il revient dans la salle sous le pseudo « Marc », sans le ressaisir
+- **THEN** il revient dans la même salle sous le pseudo « Marc », sans le ressaisir
 
 ### Requirement: Activité des participants
 L'heure de la dernière activité d'un participant SHALL être mesurée par l'horloge du serveur temps réel. Comptent comme activité : l'arrivée dans la salle, le vote, le retrait de vote, « Révéler », « Nouveau vote », le changement de pseudo, et toute interaction avec la page (souris, clavier, écran tactile) pendant que l'onglet est affiché à l'écran. L'activité due aux seules interactions SHALL être enregistrée au plus une fois toutes les 5 minutes. Un participant sans activité depuis plus de 20 minutes SHALL être considéré comme inactif.
@@ -129,3 +126,11 @@ Recharger la page MUST NOT faire perdre au participant son pseudo ni son vote du
 - **GIVEN** Marc qui a voté 5, cartes non révélées
 - **WHEN** il recharge la page
 - **THEN** il revient dans la salle sous le pseudo « Marc » avec sa carte 5 sélectionnée, et les autres le voient toujours comme ayant voté
+
+### Requirement: Revenir à la liste des salles
+Une salle SHALL afficher son nom et un lien « Toutes les salles ». Revenir à la liste, par ce lien ou par le bouton Précédent du navigateur, SHALL quitter la salle comme le bouton « Quitter » (présence, vote non révélé et pseudo libérés), sans écran intermédiaire. Ouvrir une autre salle SHALL de même quitter la précédente : un navigateur MUST NOT être présent dans deux salles à la fois depuis le même onglet.
+
+#### Scenario: Retour à la liste
+- **GIVEN** Julie et Marc dans la salle « Produit »
+- **WHEN** Marc clique sur « Toutes les salles »
+- **THEN** Marc voit la liste des salles, et il disparaît de la liste des présents de Julie

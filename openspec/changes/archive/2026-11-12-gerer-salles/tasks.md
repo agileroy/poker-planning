@@ -16,4 +16,4 @@
 ## 4. Documentation et publication
 
 - [x] 4.1 Mettre à jour `README.md` et `openspec/config.yaml`.
-- [ ] 4.2 Pousser sur `main`. Vérification : job `rules` publié, création d'une salle par équipe. Effacer l'ancienne branche `room` dans la console Firebase (facultatif).
+- [x] 4.2 Pousser sur `main`. Vérification : job `rules` « released successfully » et site publié. Fait le 12 novembre 2026 (merge 599e1fd). Reste à l'auteur : créer une salle par équipe ; effacer l'ancienne branche `room` dans la console Firebase (facultatif).
