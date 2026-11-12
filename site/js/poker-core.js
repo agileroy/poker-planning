@@ -71,6 +71,147 @@ export function pseudoKey(raw) {
       '%' + char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0'));
 }
 
+// ---------------------------------------------------------------- Salles
+// Mêmes règles de nommage que les équipes de la roue de la chance. Les écritures sont
+// des mises à jour multi-chemins relatives à la racine de la base.
+
+export const ROOM_NAME_MAX_LENGTH = 50;
+
+/** Valeur que Firebase remplace par l'heure du serveur (équivalent de serverTimestamp()). */
+export const SERVER_TIME = Object.freeze({ '.sv': 'timestamp' });
+
+export const ROOM_MESSAGES = Object.freeze({
+  nameRequired: 'Le nom de la salle est obligatoire.',
+  tooLong: `${ROOM_NAME_MAX_LENGTH} caractères au maximum.`,
+  taken: (name) => `Une salle « ${name} » existe déjà.`,
+  takenInTrash: (name) => `Une salle « ${name} » existe déjà dans la corbeille.`,
+});
+
+/** Supprime les espaces en début et fin, et réduit les espaces multiples à un seul. */
+export function normalizeRoomName(raw) {
+  return typeof raw === 'string' ? raw.trim().replace(/\s+/g, ' ') : '';
+}
+
+/**
+ * Clé d'unicité d'un nom de salle, utilisable comme clé Firebase : insensible à la
+ * casse, aux accents et aux espaces en trop (« Été » et « ete » ont la même clé).
+ */
+export function roomNameKey(raw) {
+  return normalizeRoomName(raw)
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLocaleLowerCase('fr-FR')
+    .replace(/[.#$[\]/%\u0000-\u001f\u007f]/g, (char) =>
+      '%' + char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0'));
+}
+
+/** Vérifie un nom de salle saisi. Renvoie { ok, name } ou { ok: false, error }. */
+export function validateRoomName(raw) {
+  const name = normalizeRoomName(raw);
+  if (!name) return { ok: false, error: ROOM_MESSAGES.nameRequired };
+  if (name.length > ROOM_NAME_MAX_LENGTH) return { ok: false, error: ROOM_MESSAGES.tooLong };
+  return { ok: true, name };
+}
+
+const ID_ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789';
+export const ROOM_ID_PATTERN = /^[a-z0-9]{12}$/;
+
+/** Identifiant de salle de 12 caractères [a-z0-9], comme dans les autres outils. */
+export function newRoomId(random = cryptoRandom) {
+  let id = '';
+  for (let i = 0; i < 12; i++) id += ID_ALPHABET[Math.floor(random() * ID_ALPHABET.length)];
+  return id;
+}
+
+function cryptoRandom() {
+  const buffer = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(buffer);
+  return buffer[0] / 2 ** 32;
+}
+
+const nameCollator = new Intl.Collator('fr', { sensitivity: 'base', numeric: true });
+
+function toRoom(id, raw) {
+  return {
+    id,
+    name: String(raw?.name ?? ''),
+    createdAt: typeof raw?.createdAt === 'number' ? raw.createdAt : 0,
+    deletedAt: typeof raw?.deletedAt === 'number' ? raw.deletedAt : null,
+    presentCount: Object.values(raw?.participants ?? {})
+      .filter((p) => isPresent(p) && typeof p.pseudo === 'string').length,
+  };
+}
+
+/** Une salle d'après son contenu brut, ou null si elle n'existe pas (ou plus). */
+export function roomInfo(id, raw) {
+  return raw && typeof raw.name === 'string' ? toRoom(id, raw) : null;
+}
+
+/** Salles actives (par nom) et salles de la corbeille (plus récentes d'abord), d'après /rooms. */
+export function buildRoomsView(rooms) {
+  const all = Object.entries(rooms ?? {})
+    .filter(([, raw]) => typeof raw?.name === 'string')
+    .map(([id, raw]) => toRoom(id, raw));
+  return {
+    active: all.filter((r) => r.deletedAt === null)
+      .sort((a, b) => nameCollator.compare(a.name, b.name) || a.createdAt - b.createdAt || a.id.localeCompare(b.id)),
+    trash: all.filter((r) => r.deletedAt !== null).sort((a, b) => b.deletedAt - a.deletedAt),
+  };
+}
+
+/** Message d'erreur si le nom est déjà pris par une autre salle (corbeille comprise), sinon null. */
+export function roomNameConflict(rooms, name, exceptId = null) {
+  const key = roomNameKey(name);
+  const { active, trash } = buildRoomsView(rooms);
+  const taken = [...active, ...trash].find((r) => r.id !== exceptId && roomNameKey(r.name) === key);
+  if (!taken) return null;
+  return taken.deletedAt === null ? ROOM_MESSAGES.taken(taken.name) : ROOM_MESSAGES.takenInTrash(taken.name);
+}
+
+/** « Personne », « 1 présent », « 3 présents ». */
+export function presentLabel(count) {
+  if (!count) return 'Personne';
+  return `${count} ${count > 1 ? 'présents' : 'présent'}`;
+}
+
+export function createRoomUpdate(roomId, name) {
+  return {
+    [`rooms/${roomId}`]: { name, createdAt: SERVER_TIME },
+    [`roomNames/${roomNameKey(name)}`]: roomId,
+  };
+}
+
+export function renameRoomUpdate(room, name) {
+  const update = {
+    [`rooms/${room.id}/name`]: name,
+    [`roomNames/${roomNameKey(name)}`]: room.id,
+  };
+  if (roomNameKey(room.name) !== roomNameKey(name)) update[`roomNames/${roomNameKey(room.name)}`] = null;
+  return update;
+}
+
+/** Corbeille : la salle se ferme et se vide (présents, pseudos, votes, tour) ; nom, adresse et réglages restent. */
+export function trashRoomUpdate(roomId) {
+  const base = `rooms/${roomId}`;
+  return {
+    [`${base}/deletedAt`]: SERVER_TIME,
+    [`${base}/state`]: null,
+    [`${base}/votes`]: null,
+    [`${base}/participants`]: null,
+    [`${base}/pseudos`]: null,
+  };
+}
+
+export const restoreRoomUpdate = (roomId) => ({ [`rooms/${roomId}/deletedAt`]: null });
+
+/** Suppression définitive : la salle et la réservation de son nom. */
+export function purgeRoomUpdate(room) {
+  return {
+    [`rooms/${room.id}`]: null,
+    [`roomNames/${roomNameKey(room.name)}`]: null,
+  };
+}
+
 // ---------------------------------------------------------------- Tours
 
 /** Écritures groupées du « Nouveau vote » : efface tous les votes et passe au tour suivant. */
@@ -92,7 +233,7 @@ function isPresent(participant) {
  * Construit ce que l'interface affiche à partir de l'état brut de la base.
  * La valeur du vote d'un autre participant n'est exposée qu'après la révélation.
  *
- * @param {{state?: object, participants?: object, votes?: object}} raw contenu de /room
+ * @param {{state?: object, participants?: object, votes?: object}} raw contenu de /rooms/<id>
  * @param {string} myUid identifiant du participant courant
  * @param {number} [now] heure actuelle selon le serveur (ms), pour l'inactivité
  */
