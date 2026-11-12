@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Poker planning</title>
-  <meta name="description" content="Poker planning de l'équipe, sans publicité.">
+  <meta name="description" content="Poker planning des équipes, une salle par équipe, sans publicité.">
   <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
   <script>
     // Thème appliqué avant l'affichage : choix mémorisé, sinon réglage du système.
@@ -24,8 +24,12 @@
 </head>
 <body>
   <header class="topbar">
-    <h1 class="brand"><span class="brand-card" aria-hidden="true"></span>Poker planning</h1>
+    <a class="brand" href="#/"><span class="brand-card" aria-hidden="true"></span>Poker planning</a>
     <div class="topbar-actions">
+      <nav class="nav" id="nav" aria-label="Navigation principale" hidden>
+        <a href="#/" data-nav="rooms">Salles</a>
+        <a href="#/trash" data-nav="trash">Corbeille</a>
+      </nav>
       <div class="me" id="me" hidden>
         <span class="me-name" id="me-name"></span>
         <button type="button" class="link-button" id="change-pseudo">Changer de pseudo</button>
@@ -46,10 +50,42 @@
       <p class="status-text" id="status-text">Connexion…</p>
     </section>
 
+    <!-- Liste des salles -->
+    <section class="screen page" id="screen-rooms" hidden>
+      <h1 class="page-title">Salles</h1>
+      <ul class="room-list" id="room-list"></ul>
+      <p class="empty" id="rooms-empty">Aucune salle pour l'instant. Créez celle de votre équipe ci-dessous.</p>
+      <h2 class="section-title">Nouvelle salle</h2>
+      <form class="add-form" id="room-form" novalidate>
+        <label class="visually-hidden" for="room-input">Nom de la salle</label>
+        <input id="room-input" maxlength="50" autocomplete="off" placeholder="Nom de la salle (équipe)" aria-describedby="room-error">
+        <button type="submit" class="button button-primary">Créer la salle</button>
+      </form>
+      <p class="error" id="room-error" role="alert"></p>
+    </section>
+
+    <!-- Corbeille -->
+    <section class="screen page" id="screen-trash" hidden>
+      <h1 class="page-title">Corbeille</h1>
+      <p class="page-intro">Les salles supprimées restent ici, avec leur nom et leur lien, jusqu'à leur suppression définitive.</p>
+      <ul class="trash-list" id="trash-list"></ul>
+      <p class="empty" id="trash-empty">La corbeille est vide.</p>
+    </section>
+
+    <!-- Salle introuvable ou mise à la corbeille -->
+    <section class="screen" id="screen-missing" hidden>
+      <div class="left-card">
+        <h2 id="missing-title">Salle introuvable</h2>
+        <p id="missing-text">Cette salle n'existe pas ou a été mise à la corbeille.</p>
+        <a class="button button-primary" href="#/">Voir les salles</a>
+      </div>
+    </section>
+
     <!-- Choix du pseudo -->
     <section class="screen" id="screen-pseudo" hidden>
       <form class="pseudo-form" id="pseudo-form" novalidate>
         <h2>Bienvenue !</h2>
+        <p class="pseudo-room" id="pseudo-room"></p>
         <label for="pseudo-input">Votre pseudo</label>
         <input id="pseudo-input" name="pseudo" autocomplete="nickname" autocapitalize="words" spellcheck="false" maxlength="40" required>
         <p class="error" id="pseudo-error" role="alert" aria-live="assertive"></p>
@@ -65,11 +101,22 @@
       <div class="left-card">
         <h2 id="left-title">Vous avez quitté la salle</h2>
         <p>Vous pouvez fermer cet onglet.</p>
-        <button type="button" class="button button-primary" id="rejoin">Revenir dans la salle</button>
+        <div class="left-actions">
+          <button type="button" class="button button-primary" id="rejoin">Revenir dans la salle</button>
+          <a class="link-button" href="#/">Toutes les salles</a>
+        </div>
       </div>
     </section>
 
     <!-- Salle -->
+    <div class="room-head" id="room-head" hidden>
+      <a href="#/" class="back">Toutes les salles</a>
+      <h1 class="room-title" id="room-title"></h1>
+      <div class="room-actions">
+        <button type="button" class="link-button" id="room-rename">Renommer</button>
+        <button type="button" class="link-button link-danger" id="room-trash">Mettre à la corbeille</button>
+      </div>
+    </div>
     <section class="screen room" id="screen-room" hidden>
       <section class="panel participants-panel" aria-labelledby="participants-title">
         <div class="panel-head">
@@ -177,5 +224,24 @@
     <p class="join-url" id="qr-dialog-url"></p>
     <button type="button" class="button button-primary" id="qr-close">Fermer</button>
   </dialog>
+
+  <!-- Boîte de dialogue générique : confirmation ou saisie. -->
+  <dialog id="ask" class="ask" aria-labelledby="ask-title">
+    <form method="dialog" id="ask-form" novalidate>
+      <h2 id="ask-title"></h2>
+      <p id="ask-text"></p>
+      <label id="ask-field" class="field">
+        <span id="ask-label"></span>
+        <input id="ask-input" maxlength="50" autocomplete="off" aria-describedby="ask-error">
+      </label>
+      <p class="error" id="ask-error" role="alert"></p>
+      <div class="form-actions">
+        <button value="cancel" class="button button-ghost" formnovalidate>Annuler</button>
+        <button value="ok" id="ask-ok" class="button button-primary"></button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

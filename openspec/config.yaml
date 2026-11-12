@@ -8,17 +8,19 @@ context: |
   Les votes d'un participant ne doivent jamais être visibles des autres avant la révélation.
   Hébergement : site statique sur GitHub Pages (https://agileroy.github.io/poker-planning/), sans serveur à maintenir.
   Temps réel : Firebase (offre gratuite) partage l'état des salles entre les navigateurs ;
-  le projet Firebase poker-planning-vleroy est propre au poker planning (branche room) ;
+  le projet Firebase poker-planning-vleroy est propre au poker planning (branches rooms et roomNames) ;
   database.rules.json est publié automatiquement par GitHub Actions après les tests ;
   aucun autre service tiers. N'utiliser que HTTPS (port 443), pas de connexion directe entre navigateurs (WebRTC).
   Le VPN de l'entreprise (proxy Zscaler) bloque GitHub Pages et Firebase : les participants rejoignent depuis
   leur téléphone, via le QR code affiché dans la salle.
   Stack : HTML/CSS/JavaScript vanilla en modules ES, sans framework ni étape de build (dossier site/), comme prepare-certification.
   Architecture : site/js/poker-core.js contient la logique métier pure (sans DOM ni Firebase) ;
-  site/js/room-store.js est le seul module qui parle à Firebase ; site/js/ui.js gère l'interface.
+  site/js/room-store.js est le seul module qui parle à Firebase ; site/js/ui.js (routage), lobby.js et room-ui.js gèrent l'interface.
   Les règles de sécurité Firebase (database.rules.json) doivent appliquer les mêmes contraintes que l'interface.
-  Salle unique, sans compte : pseudo unique et mémorisé dans le navigateur ; interface en français.
+  Une salle par équipe, sans compte, sur le modèle des équipes de wheel-of-chance (liste, noms uniques, corbeille) ;
+  pseudo unique dans chaque salle et mémorisé dans le navigateur ; interface en français.
   Tests : lanceur intégré de Node.js (npm test), à faire évoluer avec chaque changement de comportement ;
+  les règles sont testées par simulation (tests/rules-simulator.mjs) contre les écritures du site ;
   la publication GitHub Actions est bloquée si un test échoue.
 
 # Per-artifact rules (optional)

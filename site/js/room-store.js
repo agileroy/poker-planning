@@ -1,14 +1,14 @@
-// Seul module qui parle à Firebase : connexion anonyme, présence, pseudo et votes.
+// Seul module qui parle à Firebase : connexion anonyme, liste des salles, présence, pseudo et votes.
 // Les règles de sécurité (database.rules.json) appliquent les mêmes contraintes côté base.
+// Une page ouvre au plus une salle (`useRoom`) : changer de salle recharge la page.
 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 import {
-  getDatabase, ref, onValue, push, set, update, remove, onDisconnect, runTransaction, serverTimestamp,
+  getDatabase, ref, onValue, get, push, set, update, remove, onDisconnect, runTransaction, serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js';
 import { pseudoKey, newRoundUpdate } from './poker-core.js?v=__VERSION__';
 
-const ROOM = 'room';
 
 /** Identifiants des participants présents (au moins une connexion ouverte). */
 function presentUids(raw) {
@@ -23,6 +23,7 @@ export function createRoomStore(firebaseConfig) {
   const db = getDatabase(app);
 
   let uid = null;
+  let ROOM = null;            // chemin de la salle ouverte : rooms/<id>
   let lastRoom = null;
   let entered = false;
   let connected = false;
@@ -44,12 +45,35 @@ export function createRoomStore(firebaseConfig) {
     });
   }
 
-  /** Abonnement à tout l'état de la salle ; `callback(raw)` à chaque changement. */
-  function onRoom(callback) {
+  /** Choisit la salle de la page. */
+  function useRoom(roomId) {
+    ROOM = `rooms/${roomId}`;
+  }
+
+  /** Abonnement à toutes les salles (liste, corbeille) ; `callback(rooms)` à chaque changement. */
+  function onRooms(callback, onError) {
+    return onValue(ref(db, 'rooms'), (snapshot) => callback(snapshot.val() ?? {}), onError);
+  }
+
+  /** Lecture ponctuelle de toutes les salles (vérification d'un nom). */
+  function getRooms() {
+    return get(ref(db, 'rooms')).then((snapshot) => snapshot.val() ?? {});
+  }
+
+  /**
+   * Applique une mise à jour multi-chemins relative à la racine (décrite par poker-core.js)
+   * en une seule écriture atomique. Renvoie true si la base l'a acceptée.
+   */
+  function apply(changes) {
+    return update(ref(db), changes).then(() => true, () => false);
+  }
+
+  /** Abonnement à tout l'état de la salle ouverte ; `callback(raw)` à chaque changement (null si absente). */
+  function onRoom(callback, onError) {
     return onValue(ref(db, ROOM), (snapshot) => {
       lastRoom = snapshot.val() ?? {};
-      callback(lastRoom);
-    });
+      callback(snapshot.val());
+    }, onError);
   }
 
   /** Abonnement à l'état de la connexion temps réel ; ouvre la présence à chaque (re)connexion. */
@@ -152,10 +176,10 @@ export function createRoomStore(firebaseConfig) {
   async function leave(pseudo) {
     entered = false;
     await Promise.all(myConnections.splice(0).map((connectionRef) => onDisconnect(connectionRef).cancel().catch(() => {})));
-    await Promise.all([
+    await Promise.allSettled([
       remove(ref(db, `${ROOM}/participants/${uid}`)),
       clearVote(), // refusé après révélation : le vote d'un absent n'est de toute façon plus compté
-      pseudo ? remove(ref(db, `${ROOM}/pseudos/${pseudoKey(pseudo)}`)).catch(() => {}) : null,
+      pseudo ? remove(ref(db, `${ROOM}/pseudos/${pseudoKey(pseudo)}`)) : null,
     ]);
   }
 
@@ -173,7 +197,8 @@ export function createRoomStore(firebaseConfig) {
   }
 
   return {
-    start, serverNow, removeParticipants, stopPresence, touch, setObserver, setAutoReveal, onRoom, onConnection, claimPseudo, enter, changePseudo, vote, clearVote, reveal, newRound, leave,
+    start, useRoom, onRooms, getRooms, apply, serverNow, removeParticipants, stopPresence, touch, setObserver, setAutoReveal, onRoom, onConnection, claimPseudo, enter, changePseudo, vote, clearVote, reveal, newRound, leave,
     get uid() { return uid; },
+    get entered() { return entered; },
   };
 }
