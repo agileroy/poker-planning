@@ -136,9 +136,9 @@ Une salle SHALL afficher son nom et un lien « Toutes les salles ». Revenir à 
 - **THEN** Marc voit la liste des salles, et il disparaît de la liste des présents de Julie
 
 ### Requirement: Copier le lien depuis la salle
-L'en-tête de la salle SHALL proposer, sur tous les écrans, un bouton « Copier le lien » qui copie l'adresse courte de la salle dans le presse-papiers en un clic et le confirme par « Lien copié » pendant quelques secondes. Si le navigateur refuse la copie, l'adresse SHALL être affichée pour une copie manuelle.
+Dans la carte « Rejoindre avec un téléphone », une icône de copie SHALL suivre l'adresse de la salle. Un clic SHALL copier l'adresse courte dans le presse-papiers, changer l'icône en coche et afficher « Lien copié » pendant quelques secondes. Si le navigateur refuse la copie, l'adresse SHALL être affichée dans un message pour une copie manuelle. L'en-tête de la salle MUST NOT répéter l'adresse ni proposer de bouton de copie.
 
 #### Scenario: Copier le lien en réunion
-- **GIVEN** l'animateur dans la salle « Produit », de code `kfqz`
-- **WHEN** il clique sur « Copier le lien »
-- **THEN** le presse-papiers contient `https://agileroy.github.io/poker-planning/#kfqz`, et « Lien copié » s'affiche
+- **GIVEN** l'animateur sur ordinateur dans la salle « Produit », de code `kfqz`
+- **WHEN** il clique sur l'icône de copie à côté de l'adresse, dans la carte du QR code
+- **THEN** le presse-papiers contient `https://agileroy.github.io/poker-planning/#kfqz`, l'icône devient une coche et « Lien copié » s'affiche
