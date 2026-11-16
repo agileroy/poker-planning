@@ -212,7 +212,6 @@ export async function startRoom(store, roomId, { sweepMs = SWEEP_MS, heartbeatMs
   const joinUrl = roomUrl(roomHash(roomId));   // adresse courte de cette salle (#abcd)
   const joinLabel = joinUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
   $('join-url').textContent = joinLabel;
-  $('room-url').textContent = joinLabel;
   $('qr-dialog-url').textContent = joinLabel;
 
   const qrSvg = (() => {
@@ -247,18 +246,17 @@ export async function startRoom(store, roomId, { sweepMs = SWEEP_MS, heartbeatMs
     setTimeout(() => { status.textContent = ''; }, 4000);
   });
 
-  // Copier le lien en un clic, sur tous les écrans.
+  // Copier le lien en un clic, depuis la carte du QR code.
   let copyTimer;
   $('room-copy').addEventListener('click', async () => {
-    const button = $('room-copy');
     const copied = await copyText(joinUrl);
     if (!copied) toast(`Copie impossible : ${joinUrl}`, 'error');
-    button.textContent = copied ? 'Lien copié ✓' : 'Copier le lien';
-    button.classList.toggle('is-done', copied);
+    $('room-copy').classList.toggle('is-done', copied);
+    $('copy-status').textContent = copied ? 'Lien copié' : '';
     clearTimeout(copyTimer);
     copyTimer = setTimeout(() => {
-      button.textContent = 'Copier le lien';
-      button.classList.remove('is-done');
+      $('room-copy').classList.remove('is-done');
+      $('copy-status').textContent = '';
     }, 2500);
   });
 
