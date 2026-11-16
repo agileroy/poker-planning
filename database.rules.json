@@ -6,7 +6,7 @@
       ".read": "auth != null",
       "$roomId": {
         ".write": "auth != null && ((!data.exists() && newData.child('name').exists() && newData.child('createdAt').exists()) || (!newData.exists() && data.child('deletedAt').isNumber()))",
-        ".validate": "$roomId.matches(/^[a-z0-9]{12}$/) && newData.hasChildren(['name', 'createdAt'])",
+        ".validate": "($roomId.matches(/^[a-z]{4}$/) || $roomId.matches(/^[a-z0-9]{12}$/)) && newData.hasChildren(['name', 'createdAt'])",
         "name": {
           ".write": "auth != null && data.exists() && !data.parent().child('deletedAt').exists()",
           ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 50"

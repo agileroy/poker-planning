@@ -3,8 +3,8 @@
 // Une page n'ouvre qu'une salle : en changer recharge la page (voir ui.js).
 
 import { launchConfetti } from './confetti.js?v=__VERSION__';
-import { CARDS, MESSAGES, validatePseudo, buildRoomView, cardByValue, voteCountLabel, allVotersVoted, AUTO_REVEAL_SECONDS, questionMessage, gapMessage, waitingFor, waitingMessage, HEARTBEAT_MS, SWEEP_MS, roomInfo, validateRoomName, roomNameConflict, renameRoomUpdate, trashRoomUpdate } from './poker-core.js?v=__VERSION__';
-import { $, APP_NAME, SAVE_FAILED, showScreen, showFatal, toast, ask, setFlash } from './widgets.js?v=__VERSION__';
+import { CARDS, MESSAGES, validatePseudo, buildRoomView, cardByValue, voteCountLabel, allVotersVoted, AUTO_REVEAL_SECONDS, questionMessage, gapMessage, waitingFor, waitingMessage, HEARTBEAT_MS, SWEEP_MS, roomInfo, validateRoomName, roomNameConflict, renameRoomUpdate, trashRoomUpdate, roomHash } from './poker-core.js?v=__VERSION__';
+import { $, APP_NAME, SAVE_FAILED, showScreen, showFatal, toast, ask, setFlash, roomUrl, copyText } from './widgets.js?v=__VERSION__';
 
 const PSEUDO_STORAGE_KEY = 'poker-planning.pseudo';
 const ROLE_STORAGE_KEY = 'poker-planning.role';
@@ -209,9 +209,10 @@ export async function startRoom(store, roomId, { sweepMs = SWEEP_MS, heartbeatMs
 
   // ---------------------------------------------------------------- Rejoindre avec un téléphone
 
-  const joinUrl = `${location.origin}${location.pathname}#/room/${roomId}`;   // adresse de cette salle
+  const joinUrl = roomUrl(roomHash(roomId));   // adresse courte de cette salle (#abcd)
   const joinLabel = joinUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
   $('join-url').textContent = joinLabel;
+  $('room-url').textContent = joinLabel;
   $('qr-dialog-url').textContent = joinLabel;
 
   const qrSvg = (() => {
@@ -242,13 +243,23 @@ export async function startRoom(store, roomId, { sweepMs = SWEEP_MS, heartbeatMs
         if (error?.name === 'AbortError') return;      // partage annulé par l'utilisateur
       }
     }
-    try {
-      await navigator.clipboard.writeText(joinUrl);
-      status.textContent = 'Lien copié';
-    } catch {
-      status.textContent = joinLabel;                  // dernier recours : afficher l'adresse
-    }
+    status.textContent = (await copyText(joinUrl)) ? 'Lien copié' : joinLabel;   // dernier recours : afficher l'adresse
     setTimeout(() => { status.textContent = ''; }, 4000);
+  });
+
+  // Copier le lien en un clic, sur tous les écrans.
+  let copyTimer;
+  $('room-copy').addEventListener('click', async () => {
+    const button = $('room-copy');
+    const copied = await copyText(joinUrl);
+    if (!copied) toast(`Copie impossible : ${joinUrl}`, 'error');
+    button.textContent = copied ? 'Lien copié ✓' : 'Copier le lien';
+    button.classList.toggle('is-done', copied);
+    clearTimeout(copyTimer);
+    copyTimer = setTimeout(() => {
+      button.textContent = 'Copier le lien';
+      button.classList.remove('is-done');
+    }, 2500);
   });
 
   $('leave').addEventListener('click', async () => {

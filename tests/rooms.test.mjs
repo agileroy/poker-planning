@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   validateRoomName, normalizeRoomName, roomNameKey, roomNameConflict, buildRoomsView, roomInfo,
-  newRoomId, ROOM_ID_PATTERN, presentLabel, ROOM_MESSAGES, SERVER_TIME,
+  newRoomId, ROOM_ID_PATTERN, roomHash, parseHash, presentLabel, ROOM_MESSAGES, SERVER_TIME,
   createRoomUpdate, renameRoomUpdate, trashRoomUpdate, restoreRoomUpdate, purgeRoomUpdate,
 } from '../site/js/poker-core.js';
 
@@ -61,9 +61,39 @@ test('« Personne », « 1 présent », « 3 présents »', () => {
   assert.equal(presentLabel(3), '3 présents');
 });
 
-test('identifiant de salle : 12 caractères [a-z0-9]', () => {
-  for (let i = 0; i < 20; i++) assert.match(newRoomId(), ROOM_ID_PATTERN);
-  assert.equal(newRoomId(() => 0), 'aaaaaaaaaaaa');
+test('code de salle : 4 lettres, hors des codes déjà pris', () => {
+  for (let i = 0; i < 50; i++) assert.match(newRoomId(), /^[a-z]{4}$/);
+  assert.equal(newRoomId([], () => 0), 'aaaa');
+  // Générateur qui propose d'abord « aaaa » (pris), puis « bbbb ».
+  let calls = 0;
+  const random = () => (calls++ < 4 ? 0 : 1 / 26);
+  assert.equal(newRoomId(['aaaa'], random), 'bbbb');
+  assert.throws(() => newRoomId(['aaaa'], () => 0), /Aucun code/);
+});
+
+test('identifiants acceptés : 4 lettres, ou 12 caractères pour les anciennes salles', () => {
+  for (const ok of ['kfqz', 'k3x9q2m7a0bz']) assert.match(ok, ROOM_ID_PATTERN);
+  for (const ko of ['kfq', 'kfqzz', 'kf9z', 'KFQZ', 'k3x9q2m7a0b']) assert.doesNotMatch(ko, ROOM_ID_PATTERN);
+});
+
+test('lien d\'une salle : #abcd, ou #/room/<id> pour les anciennes', () => {
+  assert.equal(roomHash('kfqz'), '#kfqz');
+  assert.equal(roomHash('k3x9q2m7a0bz'), '#/room/k3x9q2m7a0bz');
+});
+
+test('lecture de l\'adresse : variantes du lien, liste, corbeille, code mal tapé', () => {
+  const room = (roomId, canonical) => ({ name: 'room', roomId, canonical });
+  assert.deepEqual(parseHash('#kfqz'), room('kfqz', '#kfqz'));
+  assert.deepEqual(parseHash('#KFQZ'), room('kfqz', '#kfqz'));
+  assert.deepEqual(parseHash('#/kfqz'), room('kfqz', '#kfqz'));
+  assert.deepEqual(parseHash('#/room/KfQz'), room('kfqz', '#kfqz'));
+  assert.deepEqual(parseHash('#/room/k3x9q2m7a0bz'), room('k3x9q2m7a0bz', '#/room/k3x9q2m7a0bz'));
+  assert.deepEqual(parseHash(''), { name: 'rooms' });
+  assert.deepEqual(parseHash('#/'), { name: 'rooms' });
+  assert.deepEqual(parseHash('#/trash'), { name: 'trash' });
+  assert.deepEqual(parseHash('#kfqzz'), { name: 'missing' });
+  assert.deepEqual(parseHash('#/room/zz'), { name: 'missing' });
+  assert.deepEqual(parseHash('#/un/deux'), { name: 'rooms' });
 });
 
 test('écritures : création, renommage, corbeille, restauration, suppression définitive', () => {

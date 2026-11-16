@@ -8,10 +8,10 @@ Cartes : `?` · `0` · `1` · `2` · `3` · `5` · `8` · ✂️ (ciseaux : stor
 
 ## Fonctionnement
 
-- **Une salle par équipe**, sur le modèle des équipes de la [roue de la chance](https://agileroy.github.io/wheel-of-chance/) : l'adresse du site ouvre la liste des salles (avec le nombre de présents), où l'on crée la sienne. Chaque salle a son adresse (`#/room/<identifiant>`), ses présents et ses votes. Pas de compte.
+- **Une salle par équipe**, sur le modèle des équipes de la [roue de la chance](https://agileroy.github.io/wheel-of-chance/) : l'adresse du site ouvre la liste des salles (avec le nombre de présents), où l'on crée la sienne. Chaque salle a un code de 4 lettres qui fait son adresse (`…/poker-planning/#kfqz`), ses présents et ses votes. Pas de compte. Les salles créées avant les codes courts gardent leur ancien lien (`#/room/<identifiant>`).
 - Les noms de salle sont **uniques**, sans tenir compte des majuscules, des accents ni des espaces en trop. Une salle se **renomme** depuis la salle, sans changer d'adresse.
 - Les salles supprimées passent par une **corbeille** : la salle se ferme et se vide pour ses présents ; on peut la restaurer (même lien, même QR code) ou la supprimer définitivement.
-- Sur ordinateur, un **QR code** de la salle permet de la rejoindre depuis un téléphone (clic pour l'agrandir) ; sur téléphone, **Partager le lien**.
+- **Copier le lien** en un clic, depuis la salle ou depuis la liste des salles. Sur ordinateur, un **QR code** de la salle permet aussi de la rejoindre depuis un téléphone (clic pour l'agrandir) ; sur téléphone, **Partager le lien**.
 - Le pseudo est **unique** dans chaque salle et **mémorisé** dans le navigateur pour toutes les salles ; « Changer de pseudo » permet d'en changer.
 - La liste des **présents** se met à jour en temps réel.
 - Les votes des autres restent **cachés** (carte de dos) jusqu'à ce que quelqu'un clique sur **Révéler**. On peut changer ou retirer son vote jusque-là ; après, les votes sont figés.
@@ -25,7 +25,7 @@ Le VPN de l'entreprise (proxy Zscaler) bloque GitHub Pages et Firebase : rejoind
 
 ## Architecture
 
-Site statique (HTML/CSS/JavaScript, sans build) publié sur GitHub Pages ; l'état partagé des salles est dans Firebase Realtime Database (connexion anonyme), sous `rooms/<identifiant>`, les noms réservés sous `roomNames`.
+Site statique (HTML/CSS/JavaScript, sans build) publié sur GitHub Pages ; l'état partagé des salles est dans Firebase Realtime Database (connexion anonyme), sous `rooms/<code>`, les noms réservés sous `roomNames`.
 
 - `site/js/poker-core.js` : logique métier pure (cartes, pseudo, vue de la salle, résultats, noms et écritures des salles), testée avec Node.js ;
 - `site/js/room-store.js` : seul module qui parle à Firebase ;

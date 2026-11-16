@@ -94,6 +94,24 @@ test('création refusée sans connexion, avec un identifiant invalide ou un cham
   assert.equal(t.apply(JULIE, { [`rooms/${ROOM}`]: { name: 'X', createdAt: { '.sv': 'timestamp' }, admin: true } }), false);
 });
 
+test('identifiant : code de 4 lettres (nouvelles salles) ou 12 caractères (anciennes)', () => {
+  const t = database();
+  assert.equal(t.createRoom(JULIE, 'kfqz', 'Produit'), true);
+  assert.equal(t.join(MARC, 'Marc', 'kfqz'), true);
+  assert.equal(t.vote(MARC, '5', 0, 'kfqz'), true);
+  assert.equal(t.createRoom(JULIE, ROOM, 'Ancienne'), true);
+  for (const id of ['AB12', 'abc', 'abcde', 'ab1c', 'ABCD']) {
+    assert.equal(t.createRoom(MARC, id, `Salle ${id}`), false, id);
+  }
+});
+
+test('code déjà pris : la création d\'une autre salle sur ce code est refusée', () => {
+  const t = database();
+  t.createRoom(JULIE, 'kfqz', 'Produit');
+  assert.equal(t.createRoom(MARC, 'kfqz', 'Tech'), false);
+  assert.equal(t.roomData('kfqz').name, 'Produit');
+});
+
 test('pas d\'arrivée ni de vote dans une salle qui n\'existe pas', () => {
   const t = database();
   assert.equal(t.join(JULIE, 'Julie'), false);

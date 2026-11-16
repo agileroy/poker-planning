@@ -113,14 +113,45 @@ export function validateRoomName(raw) {
   return { ok: true, name };
 }
 
-const ID_ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789';
-export const ROOM_ID_PATTERN = /^[a-z0-9]{12}$/;
+const CODE_ALPHABET = 'abcdefghijklmnopqrstuvwxyz';
+export const ROOM_CODE_LENGTH = 4;
+/** Identifiant de salle : code de 4 lettres, ou 12 caractères [a-z0-9] pour les salles créées avant. */
+export const ROOM_ID_PATTERN = /^(?:[a-z]{4}|[a-z0-9]{12})$/;
 
-/** Identifiant de salle de 12 caractères [a-z0-9], comme dans les autres outils. */
-export function newRoomId(random = cryptoRandom) {
-  let id = '';
-  for (let i = 0; i < 12; i++) id += ID_ALPHABET[Math.floor(random() * ID_ALPHABET.length)];
-  return id;
+/**
+ * Code d'une nouvelle salle : 4 lettres minuscules, absent de `taken` (identifiants
+ * existants, corbeille comprise). La base refuse de toute façon une salle qui existe déjà.
+ */
+export function newRoomId(taken = [], random = cryptoRandom) {
+  const used = new Set(taken);
+  for (let attempt = 0; attempt < 1000; attempt++) {
+    let id = '';
+    for (let i = 0; i < ROOM_CODE_LENGTH; i++) id += CODE_ALPHABET[Math.floor(random() * CODE_ALPHABET.length)];
+    if (!used.has(id)) return id;
+  }
+  throw new Error('Aucun code de salle disponible.');
+}
+
+/** Ancre de l'adresse d'une salle : `#abcd`, ou `#/room/<id>` pour les identifiants de 12 caractères. */
+export function roomHash(roomId) {
+  return roomId.length === ROOM_CODE_LENGTH ? `#${roomId}` : `#/room/${roomId}`;
+}
+
+/**
+ * Lit l'ancre de l'adresse : { name: 'rooms' | 'trash' | 'room' | 'missing', roomId?, canonical? }.
+ * `#abcd`, `#/abcd` et `#/room/abcd` (majuscules permises) désignent la même salle ;
+ * `canonical` est l'ancre à afficher.
+ */
+export function parseHash(hash) {
+  const raw = String(hash ?? '').replace(/^#/, '');
+  if (raw === '' || raw === '/') return { name: 'rooms' };
+  if (raw === '/trash') return { name: 'trash' };
+  const match = raw.match(/^\/?(?:room\/)?([^/]+)$/i);
+  if (!match) return { name: 'rooms' };
+  const roomId = match[1].toLowerCase();
+  // Code mal tapé (« #abcde ») : salle introuvable plutôt que la liste, pour le signaler.
+  if (!ROOM_ID_PATTERN.test(roomId)) return { name: /^[a-z0-9]+$/.test(roomId) ? 'missing' : 'rooms' };
+  return { name: 'room', roomId, canonical: roomHash(roomId) };
 }
 
 function cryptoRandom() {
