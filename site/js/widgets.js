@@ -108,3 +108,24 @@ export function closeDialogsOnBackdrop() {
     });
   });
 }
+
+/** Adresse complète d'une salle, à partir de son ancre (#abcd). */
+export const roomUrl = (hash) => `${location.origin}${location.pathname}${hash}`;
+
+/** Copie `text` dans le presse-papiers. Renvoie true si la copie a réussi. */
+export async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    // Repli : sélection d'un champ caché (navigateurs anciens ou presse-papiers refusé).
+    const field = h('textarea', { readonly: true, 'aria-hidden': 'true', class: 'visually-hidden' });
+    field.value = text;
+    document.body.append(field);
+    field.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch { ok = false; }
+    field.remove();
+    return ok;
+  }
+}

@@ -1,9 +1,9 @@
 // Liste des salles, création et corbeille. Ne parle à Firebase qu'à travers le store.
 import {
-  buildRoomsView, validateRoomName, roomNameConflict, newRoomId, presentLabel,
+  buildRoomsView, validateRoomName, roomNameConflict, newRoomId, presentLabel, roomHash,
   createRoomUpdate, restoreRoomUpdate, purgeRoomUpdate,
 } from './poker-core.js?v=__VERSION__';
-import { $, h, APP_NAME, SAVE_FAILED, showScreen, showFatal, toast, ask } from './widgets.js?v=__VERSION__';
+import { $, h, APP_NAME, SAVE_FAILED, showScreen, showFatal, toast, ask, roomUrl, copyText } from './widgets.js?v=__VERSION__';
 
 export function startLobby(store, route) {
   let rooms = null;
@@ -23,10 +23,20 @@ export function startLobby(store, route) {
 
   function renderRooms() {
     const { active } = buildRoomsView(rooms);
-    $('room-list').replaceChildren(...active.map((r) => h('li', {},
-      h('a', { href: `#/room/${r.id}`, class: 'room-link' },
+    $('room-list').replaceChildren(...active.map((r) => h('li', { class: 'room-row' },
+      h('a', { href: roomHash(r.id), class: 'room-link' },
         h('span', { class: 'room-name' }, r.name),
-        h('span', { class: `room-meta${r.presentCount ? ' is-busy' : ''}` }, presentLabel(r.presentCount))))));
+        h('span', { class: `room-meta${r.presentCount ? ' is-busy' : ''}` }, presentLabel(r.presentCount))),
+      h('button', {
+        type: 'button',
+        class: 'button button-ghost button-small copy-link',
+        'aria-label': `Copier le lien de la salle « ${r.name} »`,
+        onclick: async () => {
+          const url = roomUrl(roomHash(r.id));
+          if (await copyText(url)) toast(`Lien de « ${r.name} » copié.`);
+          else toast(`Copie impossible : ${url}`, 'error');
+        },
+      }, 'Copier le lien'))));
     $('rooms-empty').hidden = active.length > 0;
     showScreen('rooms');
   }
@@ -83,11 +93,18 @@ export function startLobby(store, route) {
       return;
     }
     error.textContent = '';
-    const id = newRoomId();
-    if (await save(createRoomUpdate(id, checked.name))) {
-      input.value = '';
-      location.hash = `#/room/${id}`;
+    // Code tiré hors des salles connues ; si la base le refuse (salle créée entre-temps), autre essai.
+    const taken = Object.keys(rooms ?? {});
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const id = newRoomId(taken);
+      if (await store.apply(createRoomUpdate(id, checked.name))) {
+        input.value = '';
+        location.hash = roomHash(id);
+        return;
+      }
+      taken.push(id);
     }
+    toast(SAVE_FAILED, 'error');
   });
   $('room-input').addEventListener('input', () => { $('room-error').textContent = ''; });
 
