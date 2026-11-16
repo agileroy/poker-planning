@@ -6,7 +6,7 @@ Arrivée dans une salle, pseudo, liste des présents en temps réel, sortie volo
 ## Requirements
 
 ### Requirement: Rejoindre avec un téléphone
-Sur un écran large (760 px et plus), la salle SHALL afficher en permanence une carte « Rejoindre avec un téléphone » avec un QR code de l'adresse de la salle ouverte et cette adresse en clair, sans gêner la liste des présents, les cartes ni les résultats. Un clic sur le QR code SHALL l'afficher en grand au centre de l'écran ; la touche Échap, un clic en dehors ou un bouton « Fermer » SHALL le refermer. Le QR code SHALL rester lisible en thème sombre (modules sombres sur fond clair). Sur un écran étroit, le QR code MUST NOT être affiché ; un bouton « Partager le lien » SHALL ouvrir le partage du téléphone avec l'adresse de la salle, ou à défaut copier cette adresse et le confirmer. Le générateur de QR code SHALL être embarqué dans le site, sans chargement depuis un service externe.
+Sur un écran large (760 px et plus), la salle SHALL afficher en permanence une carte « Rejoindre avec un téléphone » avec un QR code de l'adresse courte de la salle ouverte et cette adresse en clair, sans gêner la liste des présents, les cartes ni les résultats. Un clic sur le QR code SHALL l'afficher en grand au centre de l'écran ; la touche Échap, un clic en dehors ou un bouton « Fermer » SHALL le refermer. Le QR code SHALL rester lisible en thème sombre (modules sombres sur fond clair). Sur un écran étroit, le QR code MUST NOT être affiché ; un bouton « Partager le lien » SHALL ouvrir le partage du téléphone avec l'adresse de la salle, ou à défaut copier cette adresse et le confirmer. Le générateur de QR code SHALL être embarqué dans le site, sans chargement depuis un service externe.
 
 #### Scenario: Retardataire en réunion
 - **GIVEN** l'animateur qui partage son écran d'ordinateur, salle « Produit » ouverte
@@ -21,7 +21,7 @@ Sur un écran large (760 px et plus), la salle SHALL afficher en permanence une 
 #### Scenario: Sur téléphone
 - **GIVEN** la salle sur un téléphone de 390 px de large
 - **WHEN** elle s'affiche
-- **THEN** aucun QR code n'est visible, et un bouton « Partager le lien » est proposé
+- **THEN** aucun QR code n'est visible, et les boutons « Copier le lien » et « Partager le lien » sont proposés
 
 ### Requirement: Choix du pseudo
 À sa première arrivée, le participant SHALL choisir un pseudo avant d'entrer dans la salle. Le pseudo SHALL être débarrassé de ses espaces de début et de fin, et compter de 1 à 20 caractères. Un pseudo vide ou trop long MUST être refusé avec un message qui explique la règle.
@@ -134,3 +134,11 @@ Une salle SHALL afficher son nom et un lien « Toutes les salles ». Revenir à 
 - **GIVEN** Julie et Marc dans la salle « Produit »
 - **WHEN** Marc clique sur « Toutes les salles »
 - **THEN** Marc voit la liste des salles, et il disparaît de la liste des présents de Julie
+
+### Requirement: Copier le lien depuis la salle
+L'en-tête de la salle SHALL proposer, sur tous les écrans, un bouton « Copier le lien » qui copie l'adresse courte de la salle dans le presse-papiers en un clic et le confirme par « Lien copié » pendant quelques secondes. Si le navigateur refuse la copie, l'adresse SHALL être affichée pour une copie manuelle.
+
+#### Scenario: Copier le lien en réunion
+- **GIVEN** l'animateur dans la salle « Produit », de code `kfqz`
+- **WHEN** il clique sur « Copier le lien »
+- **THEN** le presse-papiers contient `https://agileroy.github.io/poker-planning/#kfqz`, et « Lien copié » s'affiche

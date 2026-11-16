@@ -108,3 +108,10 @@ Ce dépôt SHALL être le seul à publier le fichier de règles commun au projet
 - **GIVEN** un dépôt sans secret `FIREBASE_SERVICE_ACCOUNT`
 - **WHEN** le workflow s'exécute sur `main`
 - **THEN** le job des règles signale qu'il est sauté et le site est publié quand même
+
+### Requirement: Identifiants de salle acceptés par la base
+Les règles de sécurité MUST n'accepter que deux formes d'identifiant de salle : 4 lettres minuscules (salles créées depuis ce changement) ou 12 caractères `[a-z0-9]` (salles créées avant).
+
+#### Scenario: Identifiant invalide
+- **WHEN** un navigateur tente de créer une salle d'identifiant `AB12`
+- **THEN** la base refuse l'écriture

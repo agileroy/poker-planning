@@ -10,4 +10,4 @@
 
 ## 3. Publication
 
-- [ ] 3.1 Mettre à jour `README.md`, pousser, vérifier la publication.
+- [x] 3.1 Mettre à jour `README.md`, pousser, vérifier la publication. Fait le 16 novembre 2026 (merge 585dd77) : règles « released successfully », site déployé.
