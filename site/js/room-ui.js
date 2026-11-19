@@ -505,21 +505,37 @@ export async function startRoom(store, roomId, { sweepMs = SWEEP_MS, heartbeatMs
     $('results').hidden = !results;
     if (results) {
       $('mean').textContent = results.meanLabel;
-      $('distribution').replaceChildren(...results.distribution.map((entry) => {
+      const { columns, maxCount, meanPosition } = results.histogram;
+      $('histogram').style.setProperty('--columns', String(columns.length));
+      $('distribution').replaceChildren(...columns.map((column) => {
         const li = document.createElement('li');
-        li.append(`${entry.count} × `, cardContent(entry.value));
+        li.className = 'histogram-column';
+        li.classList.toggle('is-top', column.top);
+        li.classList.toggle('is-empty', column.count === 0);
+        li.classList.toggle('is-off-scale', !column.numeric);
+        const name = cardByValue(column.value)?.alt ?? column.label;
+        li.setAttribute('aria-label', `${name} : ${column.count} ${column.count > 1 ? 'votes' : 'vote'}`);
+        const bar = document.createElement('span');
+        bar.className = 'histogram-bar';
+        bar.setAttribute('aria-hidden', 'true');
+        bar.style.setProperty('--ratio', String(maxCount ? column.count / maxCount : 0));
+        if (column.count > 0) bar.textContent = String(column.count);
+        const value = document.createElement('span');
+        value.className = 'histogram-value';
+        value.setAttribute('aria-hidden', 'true');
+        value.append(cardContent(column.value));
+        if (column.count === 0) {
+          const zero = document.createElement('span');
+          zero.className = 'histogram-zero';
+          zero.setAttribute('aria-hidden', 'true');
+          zero.textContent = '0';
+          li.append(zero);
+        }
+        li.append(bar, value);
         return li;
       }));
-      const extremes = results.extremes;
-      $('extremes').hidden = !extremes;
-      if (extremes) {
-        for (const side of ['low', 'high']) {
-          const value = document.createElement('span');
-          value.className = 'extreme-value';
-          value.textContent = extremes[side].value;
-          $(`extreme-${side}`).replaceChildren(value, extremes[side].pseudos.join(', '));
-        }
-      }
+      $('histogram-mean').hidden = meanPosition === null;
+      if (meanPosition !== null) $('histogram').style.setProperty('--mean', String(meanPosition));
       $('gap').hidden = !results.gap;
       if (results.gap) {
         const { title, simpler, harder } = gapMessage(results.gap);

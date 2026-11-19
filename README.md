@@ -17,7 +17,7 @@ Cartes : `?` · `0` · `1` · `2` · `3` · `5` · `8` · ✂️ (ciseaux : stor
 - Les votes des autres restent **cachés** (carte de dos) jusqu'à ce que quelqu'un clique sur **Révéler**. On peut changer ou retirer son vote jusque-là ; après, les votes sont figés.
 - **Nouveau vote** efface tous les votes et recommence un tour, pour tout le monde.
 - **Quitter**, ou revenir à la liste (« Toutes les salles », bouton Précédent), retire de la salle ; les participants inactifs depuis plus de 20 minutes (onglet oublié) sont retirés automatiquement.
-- Après la révélation : répartition, moyenne (sans `?` ni ✂️), consensus quand tout le monde a la même carte, alerte « Story à découper ? » si une carte ✂️ a été jouée.
+- Après la révélation : histogramme des votes (du plus petit au plus grand, crans vides compris, repère de moyenne), moyenne (sans `?` ni ✂️), consensus quand tout le monde a la même carte, alerte « Story à découper ? » si une carte ✂️ a été jouée.
 
 ## Réseau d'entreprise
 
