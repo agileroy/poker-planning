@@ -504,7 +504,12 @@ export async function startRoom(store, roomId, { sweepMs = SWEEP_MS, heartbeatMs
     const results = view.results;
     $('results').hidden = !results;
     if (results) {
-      $('median').textContent = results.medianLabel;
+      // Machine à sous : plus bas, médiane, plus haut ; tous allumés en cas de consensus.
+      for (const [id, label] of [['reel-low', results.lowLabel], ['median', results.medianLabel], ['reel-high', results.highLabel]]) {
+        $(id).textContent = label;
+        $(id).classList.toggle('is-long', label.length > 2);
+      }
+      $('slot').classList.toggle('is-jackpot', results.consensus !== null);
       const { columns, maxCount, medianPosition } = results.histogram;
       $('histogram').style.setProperty('--columns', String(columns.length));
       $('distribution').replaceChildren(...columns.map((column) => {
@@ -544,7 +549,7 @@ export async function startRoom(store, roomId, { sweepMs = SWEEP_MS, heartbeatMs
         $('gap-harder').textContent = harder;
       }
       $('consensus').hidden = results.consensus === null;
-      $('consensus').textContent = results.consensus === null ? '' : `Consensus : ${results.consensus}`;
+      $('consensus').textContent = results.consensus === null ? '' : `Jackpot ! Consensus : ${results.consensus}`;
       const question = questionMessage(results.questionPseudos);
       $('question-alert').hidden = !question;
       if (question) {
