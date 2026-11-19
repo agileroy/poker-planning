@@ -496,7 +496,7 @@ main { max-width: 960px; margin: 0 auto; padding: 0 16px 32px; }
 }
 .histogram-column.is-top .histogram-bar { background: var(--accent); color: var(--accent-text); box-shadow: none; }
 .histogram-column.is-empty .histogram-bar { height: 3px; padding: 0; border-radius: 2px; background: var(--border); animation: none; }
-.histogram-zero { text-align: center; color: var(--muted); font-size: 0.875rem; margin-bottom: 4px; }
+.histogram-zero { width: fit-content; margin: 0 auto 4px; padding: 0 4px; border-radius: 4px; background: var(--surface); color: var(--muted); font-size: 0.875rem; }
 .histogram-value {
   margin-top: 6px; text-align: center;
   font-weight: 800; font-size: 1.05rem; line-height: 1.2;
@@ -504,13 +504,13 @@ main { max-width: 960px; margin: 0 auto; padding: 0 16px 32px; }
 }
 .histogram-column.is-empty .histogram-value { color: var(--muted); font-weight: 600; }
 .histogram-value .scissors-icon { width: 18px; height: 18px; }
-.histogram-mean {
+.histogram-median {
   position: absolute; z-index: 0; top: 16px; bottom: calc(1.3em + 8px);
-  left: calc((100% - (var(--columns) - 1) * var(--gap)) / var(--columns) * (var(--mean) + 0.5) + var(--mean) * var(--gap));
+  left: calc((100% - (var(--columns) - 1) * var(--gap)) / var(--columns) * (var(--median) + 0.5) + var(--median) * var(--gap));
   border-left: 2px dashed var(--muted); margin-left: -1px;
   pointer-events: none;
 }
-.histogram-mean span {
+.histogram-median span {
   position: absolute; top: -18px; left: 0; transform: translateX(-50%);
   color: var(--muted); font-size: 0.75rem; white-space: nowrap;
 }

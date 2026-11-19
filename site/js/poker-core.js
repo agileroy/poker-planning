@@ -437,22 +437,34 @@ export function computeExtremes(voters) {
 }
 
 
-const meanFormatter = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 });
+/**
+ * Médiane des cartes chiffrées : `{ low, high }`, deux valeurs égales sauf quand le nombre
+ * de votes est pair et que les deux votes du milieu diffèrent ; null sans carte chiffrée.
+ * @param {number[]} numbers
+ */
+export function computeMedian(numbers) {
+  if (!numbers.length) return null;
+  const sorted = [...numbers].sort((a, b) => a - b);
+  const n = sorted.length;
+  return n % 2 ? { low: sorted[(n - 1) / 2], high: sorted[(n - 1) / 2] } : { low: sorted[n / 2 - 1], high: sorted[n / 2] };
+}
 
-/** Moyenne affichée : une décimale au plus, virgule française, « – » si absente. */
-export function formatMean(mean) {
-  return mean === null || mean === undefined || Number.isNaN(mean) ? '–' : meanFormatter.format(mean);
+/** Médiane affichée : la carte (« 3 »), les deux cartes du milieu (« 2 – 3 »), ou « – ». */
+export function formatMedian(median) {
+  if (!median) return '–';
+  return median.low === median.high ? String(median.low) : `${median.low} – ${median.high}`;
 }
 
 /**
  * Histogramme des votes : une colonne par cran de l'échelle, du plus petit au plus grand
  * vote chiffré (crans non joués compris, à 0), puis `?` et ciseaux s'ils ont été joués.
- * `top` marque la ou les cartes les plus jouées ; `meanPosition` place la moyenne entre
- * les colonnes chiffrées (0 = première colonne), ou vaut null s'il y a moins de deux crans.
+ * `top` marque la ou les cartes les plus jouées ; `medianPosition` place la médiane sur les
+ * colonnes chiffrées (0 = première colonne ; entre deux colonnes si elle tombe entre deux
+ * cartes), ou vaut null s'il y a moins de deux crans.
  * @param {{value: string, label: string, count: number}[]} distribution
- * @param {number|null} mean
+ * @param {{low: number, high: number}|null} median
  */
-export function computeHistogram(distribution, mean) {
+export function computeHistogram(distribution, median) {
   const countOf = (value) => distribution.find((e) => e.value === value)?.count ?? 0;
   const played = NUMERIC_SCALE.filter((value) => countOf(value) > 0);
   const scale = played.length
@@ -465,18 +477,16 @@ export function computeHistogram(distribution, mean) {
     return { value, label: cardByValue(value).label, count, numeric, top: count > 0 && count === maxCount };
   };
 
-  let meanPosition = null;
-  if (scale.length >= 2 && mean !== null) {
-    const values = scale.map(Number);
-    const i = Math.max(0, values.findLastIndex((v) => v <= mean));
-    const next = Math.min(i + 1, values.length - 1);
-    meanPosition = next === i ? i : i + (mean - values[i]) / (values[next] - values[i]);
+  let medianPosition = null;
+  if (scale.length >= 2 && median) {
+    const at = (value) => scale.indexOf(String(value));
+    medianPosition = (at(median.low) + at(median.high)) / 2;
   }
 
   return {
     columns: [...scale.map((v) => column(v, true)), ...others.map((v) => column(v, false))],
     maxCount,
-    meanPosition,
+    medianPosition,
   };
 }
 
@@ -489,7 +499,7 @@ export function computeResults(values) {
     .filter((entry) => entry.count > 0);
 
   const numbers = valid.filter(isNumericCard).map(Number);
-  const mean = numbers.length ? numbers.reduce((sum, n) => sum + n, 0) / numbers.length : null;
+  const median = computeMedian(numbers);
 
   const allSame = valid.length >= 2 && valid.every((v) => v === valid[0]);
   const consensus = allSame && isNumericCard(valid[0]) ? valid[0] : null;
@@ -497,9 +507,9 @@ export function computeResults(values) {
   return {
     voteCount: valid.length,
     distribution,
-    histogram: computeHistogram(distribution, mean),
-    mean,
-    meanLabel: formatMean(mean),
+    histogram: computeHistogram(distribution, median),
+    median,
+    medianLabel: formatMedian(median),
     consensus,
     scissorsCount: valid.filter((v) => v === SCISSORS).length,
   };

@@ -84,7 +84,7 @@ Sur un écran de moins de 760 px de large, la salle SHALL afficher dans cet ordr
 - **THEN** son téléphone ne vibre pas
 
 ### Requirement: Disposition des résultats sur grand écran
-Sur un écran d'au moins 760 px de large, la salle SHALL afficher la liste des présents et la carte « Rejoindre avec un téléphone » côte à côte, puis, une fois les cartes révélées, les résultats sur toute la largeur, puis la zone « Votre carte ». À l'intérieur des résultats, les chiffres (moyenne, répartition, plus bas et plus haut) SHALL occuper la colonne de gauche et les messages (écart, consensus, question, ciseaux) la colonne de droite ; sans aucun message, les chiffres SHALL occuper toute la largeur. Sur un écran plus étroit, la disposition de la « Mise en page sur téléphone » MUST rester inchangée.
+Sur un écran d'au moins 760 px de large, la salle SHALL afficher la liste des présents et la carte « Rejoindre avec un téléphone » côte à côte, puis, une fois les cartes révélées, les résultats sur toute la largeur, puis la zone « Votre carte ». À l'intérieur des résultats, les chiffres (médiane et histogramme de répartition) SHALL occuper la colonne de gauche et les messages (écart, consensus, question, ciseaux) la colonne de droite ; sans aucun message, les chiffres SHALL occuper toute la largeur. Sur un écran plus étroit, la disposition de la « Mise en page sur téléphone » MUST rester inchangée.
 
 #### Scenario: Résultats sur toute la largeur
 - **GIVEN** un écran de 1100 px et des cartes révélées avec un écart important

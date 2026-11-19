@@ -504,8 +504,8 @@ export async function startRoom(store, roomId, { sweepMs = SWEEP_MS, heartbeatMs
     const results = view.results;
     $('results').hidden = !results;
     if (results) {
-      $('mean').textContent = results.meanLabel;
-      const { columns, maxCount, meanPosition } = results.histogram;
+      $('median').textContent = results.medianLabel;
+      const { columns, maxCount, medianPosition } = results.histogram;
       $('histogram').style.setProperty('--columns', String(columns.length));
       $('distribution').replaceChildren(...columns.map((column) => {
         const li = document.createElement('li');
@@ -534,8 +534,8 @@ export async function startRoom(store, roomId, { sweepMs = SWEEP_MS, heartbeatMs
         li.append(bar, value);
         return li;
       }));
-      $('histogram-mean').hidden = meanPosition === null;
-      if (meanPosition !== null) $('histogram').style.setProperty('--mean', String(meanPosition));
+      $('histogram-median').hidden = medianPosition === null;
+      if (medianPosition !== null) $('histogram').style.setProperty('--median', String(medianPosition));
       $('gap').hidden = !results.gap;
       if (results.gap) {
         const { title, simpler, harder } = gapMessage(results.gap);

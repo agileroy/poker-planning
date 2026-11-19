@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   CARDS, MESSAGES, validatePseudo, pseudoKey, isNumericCard,
-  buildRoomView, computeResults, formatMean, newRoundUpdate,
+  buildRoomView, computeResults, computeMedian, formatMedian, newRoundUpdate,
   INACTIVITY_MS, HEARTBEAT_MS, SWEEP_MS, isInactive, computeExtremes, voteCountLabel, allVotersVoted, AUTO_REVEAL_SECONDS, questionMessage,
   NUMERIC_SCALE, stepsBetween, computeGap, gapMessage,
   waitingFor, waitingMessage,
@@ -158,21 +158,23 @@ test('répartition dans l\'ordre du jeu, cartes non jouées absentes', () => {
   ]);
 });
 
-test('moyenne sans ? ni ciseaux : 3, 5, ?, ciseaux → « 4 »', () => {
-  assert.equal(computeResults(['3', '5', '?', 'scissors']).meanLabel, '4');
+test('médiane sans ? ni ciseaux : 3, 5, 8, ?, ciseaux → « 5 »', () => {
+  assert.equal(computeResults(['3', '5', '8', '?', 'scissors']).medianLabel, '5');
 });
 
-test('moyenne arrondie : 3, 5, 8 → « 5,3 »', () => {
-  assert.equal(computeResults(['3', '5', '8']).meanLabel, '5,3');
+test('médiane, nombre impair : un vote isolé ne la déplace pas', () => {
+  assert.equal(computeResults(['2', '2', '2', '2', '8']).medianLabel, '2');
 });
 
-test('moyenne décimale : 1, 2 → « 1,5 »', () => {
-  assert.equal(computeResults(['1', '2']).meanLabel, '1,5');
+test('médiane, nombre pair : 2, 2, 2, 2, 3, 3 → « 2 » ; 2, 2, 3, 3 → « 2 – 3 »', () => {
+  assert.equal(computeResults(['2', '2', '2', '2', '3', '3']).medianLabel, '2');
+  assert.equal(computeResults(['3', '2', '3', '2']).medianLabel, '2 – 3');
+  assert.deepEqual(computeMedian([1, 8]), { low: 1, high: 8 });
 });
 
 test('aucune carte chiffrée : ?, ciseaux → « – »', () => {
-  assert.equal(computeResults(['?', 'scissors']).meanLabel, '–');
-  assert.equal(formatMean(null), '–');
+  assert.equal(computeResults(['?', 'scissors']).medianLabel, '–');
+  assert.equal(formatMedian(null), '–');
 });
 
 test('consensus : 3, 3, 3 → 3 ; 3, 3, 5 → aucun', () => {
@@ -455,11 +457,14 @@ test('histogramme : ? et ciseaux après l\'échelle, s\'ils sont joués', () => 
   assert.equal(columnsOf(['?', '?']), '?:2*');
 });
 
-test('histogramme : position de la moyenne entre les colonnes', () => {
-  const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} ≠ ${expected}`);
-  near(computeResults(['2', '2', '2', '2', '3', '3']).histogram.meanPosition, 1 / 3);
-  // 2, 3, 3, 3, 8, 8 : moyenne 4,5, entre 3 (colonne 1) et 5 (colonne 2)
-  near(computeResults(['2', '3', '3', '3', '8', '8']).histogram.meanPosition, 1.75);
-  assert.equal(computeResults(['3', '3']).histogram.meanPosition, null);
-  assert.equal(computeResults(['?']).histogram.meanPosition, null);
+test('histogramme : position de la médiane sur les colonnes', () => {
+  assert.equal(computeResults(['2', '2', '2', '2', '3', '3']).histogram.medianPosition, 0);
+  // 2, 3, 3, 8 : médiane entre 3 (colonne 1) et 3 → colonne 1
+  assert.equal(computeResults(['2', '3', '3', '8']).histogram.medianPosition, 1);
+  // 2, 3, 5, 8 : médiane entre 3 (colonne 1) et 5 (colonne 2)
+  assert.equal(computeResults(['2', '3', '5', '8']).histogram.medianPosition, 1.5);
+  // 2, 2, 8, 8 : entre 2 (colonne 0) et 8 (colonne 3), crans vides compris
+  assert.equal(computeResults(['2', '2', '8', '8']).histogram.medianPosition, 1.5);
+  assert.equal(computeResults(['3', '3']).histogram.medianPosition, null);
+  assert.equal(computeResults(['?']).histogram.medianPosition, null);
 });

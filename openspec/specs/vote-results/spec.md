@@ -1,25 +1,25 @@
 # Vote Results Specification
 
 ## Purpose
-Résultats affichés après la révélation : histogramme de répartition, moyenne, consensus et alerte ciseaux. Couvre `computeResults` dans `site/js/poker-core.js`.
+Résultats affichés après la révélation : histogramme de répartition, médiane, consensus et alerte ciseaux. Couvre `computeResults` dans `site/js/poker-core.js`.
 
 ## Requirements
 
 ### Requirement: Résultats affichés après la révélation
-Après la révélation, la salle SHALL afficher les résultats des votes des participants présents. Avant la révélation, les résultats MUST NOT être affichés. Les résultats SHALL comprendre la répartition des votes, la moyenne, et selon le cas le message de consensus et l'alerte ciseaux.
+Après la révélation, la salle SHALL afficher les résultats des votes des participants présents. Avant la révélation, les résultats MUST NOT être affichés. Les résultats SHALL comprendre la répartition des votes, la médiane, et selon le cas le message de consensus et l'alerte ciseaux.
 
 #### Scenario: Pas de résultats avant la révélation
 - **GIVEN** des votes en cours, cartes non révélées
 - **WHEN** la salle s'affiche
-- **THEN** aucune répartition, moyenne ni message de consensus n'est visible
+- **THEN** aucune répartition, médiane ni message de consensus n'est visible
 
 ### Requirement: Répartition des votes
-La répartition SHALL s'afficher sous forme d'histogramme, sans pseudos : une colonne par cran de l'échelle 0, 1, 2, 3, 5, 8, du plus petit au plus grand vote chiffré joué, bornes comprises. Les crans non joués entre ces bornes SHALL apparaître avec 0 vote (trait plat) ; les crans en dehors MUST NOT apparaître. Les cartes `?` et ciseaux, si elles ont été jouées, SHALL suivre l'échelle, séparées d'elle, et ne pas apparaître sinon. Chaque colonne SHALL indiquer son nombre de votes ; sa hauteur est proportionnelle à ce nombre, et la ou les cartes les plus jouées SHALL ressortir en couleur pleine. Quand l'histogramme compte au moins deux crans chiffrés et qu'il y a une moyenne, un repère « moyenne » SHALL la situer entre les colonnes. Chaque colonne SHALL avoir un libellé accessible (« 2 : 4 votes »).
+La répartition SHALL s'afficher sous forme d'histogramme, sans pseudos : une colonne par cran de l'échelle 0, 1, 2, 3, 5, 8, du plus petit au plus grand vote chiffré joué, bornes comprises. Les crans non joués entre ces bornes SHALL apparaître avec 0 vote (trait plat) ; les crans en dehors MUST NOT apparaître. Les cartes `?` et ciseaux, si elles ont été jouées, SHALL suivre l'échelle, séparées d'elle, et ne pas apparaître sinon. Chaque colonne SHALL indiquer son nombre de votes ; sa hauteur est proportionnelle à ce nombre, et la ou les cartes les plus jouées SHALL ressortir en couleur pleine. Quand l'histogramme compte au moins deux crans chiffrés, un repère « médiane » SHALL se placer sur la colonne de la médiane, ou à mi-chemin entre les deux colonnes du milieu quand elle tombe entre deux cartes. Chaque colonne SHALL avoir un libellé accessible (« 2 : 4 votes »).
 
 #### Scenario: Plage des votes
 - **GIVEN** des votes révélés 2, 2, 2, 2, 3, 3
 - **WHEN** les résultats s'affichent
-- **THEN** l'histogramme a deux colonnes, 2 (4 votes, mise en avant) et 3 (2 votes), avec le repère de moyenne entre les deux, plus près de 2
+- **THEN** l'histogramme a deux colonnes, 2 (4 votes, mise en avant) et 3 (2 votes), avec le repère de médiane sur 2
 
 #### Scenario: Crans non joués
 - **GIVEN** des votes révélés 2, 3, 3, 3, 8, 8
@@ -34,30 +34,35 @@ La répartition SHALL s'afficher sous forme d'histogramme, sans pseudos : une co
 #### Scenario: Consensus
 - **GIVEN** des votes révélés 5, 5, 5
 - **WHEN** les résultats s'affichent
-- **THEN** l'histogramme a une seule colonne, 5 (3 votes), sans repère de moyenne
+- **THEN** l'histogramme a une seule colonne, 5 (3 votes), sans repère de médiane
 
-### Requirement: Moyenne des cartes chiffrées
-La moyenne SHALL être calculée sur les seules cartes chiffrées ; les cartes `?` et ciseaux MUST être exclues. Elle SHALL être arrondie à une décimale, avec une virgule comme séparateur (« 5,8 »), sans décimale quand elle est entière (« 5 »). S'il n'y a aucune carte chiffrée, la moyenne SHALL s'afficher « – ».
+### Requirement: Médiane des cartes chiffrées
+Les résultats SHALL afficher, sous le libellé « Médiane », la médiane des seules cartes chiffrées ; les cartes `?` et ciseaux MUST être exclues. Avec un nombre impair de cartes chiffrées, ou quand les deux cartes du milieu sont identiques, la médiane SHALL s'afficher comme cette carte (« 3 »). Quand le nombre est pair et que les deux cartes du milieu diffèrent, les deux SHALL s'afficher, de la plus petite à la plus grande (« 2 – 3 »), sans valeur intermédiaire. S'il n'y a aucune carte chiffrée, la médiane SHALL s'afficher « – ». Les résultats MUST NOT afficher de moyenne.
 
-#### Scenario: Moyenne avec cartes non chiffrées
-- **GIVEN** des votes révélés 3, 5, ?, ciseaux
+#### Scenario: Médiane avec cartes non chiffrées
+- **GIVEN** des votes révélés 3, 5, 8, ?, ciseaux
 - **WHEN** les résultats s'affichent
-- **THEN** la moyenne affichée est « 4 »
+- **THEN** la médiane affichée est « 5 »
 
-#### Scenario: Moyenne arrondie
-- **GIVEN** des votes révélés 3, 5, 8
+#### Scenario: Vote isolé
+- **GIVEN** des votes révélés 2, 2, 2, 2, 8
 - **WHEN** les résultats s'affichent
-- **THEN** la moyenne affichée est « 5,3 »
+- **THEN** la médiane affichée est « 2 »
 
-#### Scenario: Moyenne décimale
-- **GIVEN** des votes révélés 1, 2
+#### Scenario: Nombre pair, cartes du milieu identiques
+- **GIVEN** des votes révélés 2, 2, 2, 2, 3, 3
 - **WHEN** les résultats s'affichent
-- **THEN** la moyenne affichée est « 1,5 »
+- **THEN** la médiane affichée est « 2 »
+
+#### Scenario: Nombre pair, cartes du milieu différentes
+- **GIVEN** des votes révélés 2, 2, 3, 3
+- **WHEN** les résultats s'affichent
+- **THEN** la médiane affichée est « 2 – 3 »
 
 #### Scenario: Aucune carte chiffrée
 - **GIVEN** des votes révélés ?, ciseaux
 - **WHEN** les résultats s'affichent
-- **THEN** la moyenne affichée est « – »
+- **THEN** la médiane affichée est « – »
 
 ### Requirement: Consensus
 Un message de consensus SHALL s'afficher quand au moins deux participants ont voté et que tous les votes portent sur la même carte chiffrée. Il MUST NOT s'afficher pour un seul votant, ni quand la carte commune est `?` ou ciseaux.
