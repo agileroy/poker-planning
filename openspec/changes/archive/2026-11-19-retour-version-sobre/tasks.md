@@ -4,4 +4,4 @@
 
 ## 2. Publication
 
-- [ ] 2.1 Publier. Vérification : job `deploy` réussi.
+- [x] 2.1 Publier. Vérification : job `deploy` réussi (d99b964, 19 novembre 2026).
