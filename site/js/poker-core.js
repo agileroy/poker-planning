@@ -510,9 +510,6 @@ export function computeResults(values) {
     histogram: computeHistogram(distribution, median),
     median,
     medianLabel: formatMedian(median),
-    // Rouleaux de la machine à sous : plus petite et plus grande carte chiffrée jouée.
-    lowLabel: numbers.length ? String(Math.min(...numbers)) : '–',
-    highLabel: numbers.length ? String(Math.max(...numbers)) : '–',
     consensus,
     scissorsCount: valid.filter((v) => v === SCISSORS).length,
   };

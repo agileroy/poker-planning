@@ -177,18 +177,6 @@ test('aucune carte chiffrée : ?, ciseaux → « – »', () => {
   assert.equal(formatMedian(null), '–');
 });
 
-test('machine à sous : plus bas et plus haut des cartes chiffrées, sans ? ni ciseaux', () => {
-  const r = computeResults(['5', '3', '8', '?', 'scissors', '0']);
-  assert.deepEqual([r.lowLabel, r.medianLabel, r.highLabel], ['0', '3 – 5', '8']);
-  const one = computeResults(['3', '3', '3']);
-  assert.deepEqual([one.lowLabel, one.medianLabel, one.highLabel], ['3', '3', '3']);
-});
-
-test('machine à sous sans carte chiffrée : trois « – »', () => {
-  const r = computeResults(['?', 'scissors']);
-  assert.deepEqual([r.lowLabel, r.medianLabel, r.highLabel], ['–', '–', '–']);
-});
-
 test('consensus : 3, 3, 3 → 3 ; 3, 3, 5 → aucun', () => {
   assert.equal(computeResults(['3', '3', '3']).consensus, '3');
   assert.equal(computeResults(['3', '3', '5']).consensus, null);
