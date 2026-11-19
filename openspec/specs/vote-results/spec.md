@@ -158,7 +158,7 @@ L'écart entre deux cartes chiffrées SHALL se mesurer en crans sur l'échelle 0
 - **THEN** aucun encadré d'écart ne s'affiche
 
 ### Requirement: Présentation des messages à discuter
-Les messages « Écart important », « Questions (carte ?) » et « Alerte ciseaux » SHALL partager une même présentation : encadré sombre avec une bordure néon de sa couleur, pastille ronde pleine contenant une icône, titre en gras puis texte. Chaque message SHALL avoir sa couleur, distincte du vert du consensus : orange avec une icône de bulles de discussion pour l'écart important, rouge avec une icône de point d'interrogation pour la carte `?`, violet avec une icône de ciseaux pour la carte ciseaux. Les textes SHALL rester lisibles sur le fond sombre ; les icônes sont décoratives (masquées aux lecteurs d'écran), le texte porte le sens.
+Les messages « Écart important », « Questions (carte ?) » et « Alerte ciseaux » SHALL partager une même présentation : encadré teinté avec une bordure de sa couleur, légèrement lumineuse, pastille ronde pleine contenant une icône, titre en gras puis texte. Chaque message SHALL avoir sa couleur, distincte du vert du consensus : orange avec une icône de bulles de discussion pour l'écart important, rouge avec une icône de point d'interrogation pour la carte `?`, violet avec une icône de ciseaux pour la carte ciseaux. Les couleurs SHALL rester lisibles en thème clair et en thème sombre ; les icônes sont décoratives (masquées aux lecteurs d'écran), le texte porte le sens.
 
 #### Scenario: Messages distincts
 - **GIVEN** des votes révélés : Julie 1, Marc 3, Paul ?, Léa ciseaux
