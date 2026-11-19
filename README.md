@@ -17,8 +17,7 @@ Cartes : `?` · `0` · `1` · `2` · `3` · `5` · `8` · ✂️ (ciseaux : stor
 - Les votes des autres restent **cachés** (carte de dos) jusqu'à ce que quelqu'un clique sur **Révéler**. On peut changer ou retirer son vote jusque-là ; après, les votes sont figés.
 - **Nouveau vote** efface tous les votes et recommence un tour, pour tout le monde.
 - **Quitter**, ou revenir à la liste (« Toutes les salles », bouton Précédent), retire de la salle ; les participants inactifs depuis plus de 20 minutes (onglet oublié) sont retirés automatiquement.
-- Après la révélation : machine à sous à trois rouleaux — plus bas, médiane (sans `?` ni ✂️ ; les deux cartes du milieu, « 2 – 3 », si elles diffèrent), plus haut —, histogramme des votes en colonnes de LED (du plus petit au plus grand, crans vides compris, repère de médiane), « Jackpot ! » quand tout le monde a la même carte, alerte « Story à découper ? » si une carte ✂️ a été jouée.
-- **Ambiance casino néon**, en thème clair (« Vegas en plein jour ») ou sombre (néon de nuit) : thème du système par défaut, bouton pour basculer, choix mémorisé dans le navigateur. Les polices (Monoton, Chakra Petch, licence SIL OFL) sont embarquées dans `site/fonts/` : aucun appel à un service tiers.
+- Après la révélation : histogramme des votes (du plus petit au plus grand, crans vides compris, repère de médiane), médiane (sans `?` ni ✂️ ; les deux cartes du milieu, « 2 – 3 », si elles diffèrent), consensus quand tout le monde a la même carte, alerte « Story à découper ? » si une carte ✂️ a été jouée.
 
 ## Réseau d'entreprise
 

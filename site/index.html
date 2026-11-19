@@ -6,8 +6,6 @@
   <title>Poker planning</title>
   <meta name="description" content="Poker planning des équipes, une salle par équipe, sans publicité.">
   <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
-  <meta name="theme-color" content="#fff7ef" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0c0716" media="(prefers-color-scheme: dark)">
   <script>
     // Thème appliqué avant l'affichage : choix mémorisé, sinon réglage du système.
     (function () {
@@ -19,8 +17,6 @@
       document.documentElement.dataset.theme = theme;
     })();
   </script>
-  <link rel="preload" href="fonts/chakra-petch-400.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/monoton-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="app.css?v=__VERSION__">
   <script defer src="vendor/qrcode-generator-1.4.4.js?v=__VERSION__"></script>
   <script type="module" src="js/theme.js?v=__VERSION__"></script>
@@ -174,28 +170,20 @@
       </div>
 
       <section class="panel results" id="results" aria-labelledby="results-title" hidden>
-        <h2 id="results-title">Résultats du tirage</h2>
+        <h2 id="results-title">Résultats</h2>
         <div class="results-layout">
         <div class="results-figures">
-        <dl class="slot" id="slot">
-          <div class="reel reel-low">
-            <dt>Plus bas</dt>
-            <dd id="reel-low"></dd>
+        <div class="results-grid">
+          <div class="stat">
+            <span class="stat-label">Médiane</span>
+            <span class="stat-value" id="median"></span>
           </div>
-          <div class="reel reel-median">
-            <dt>Médiane</dt>
-            <dd id="median"></dd>
-          </div>
-          <div class="reel reel-high">
-            <dt>Plus haut</dt>
-            <dd id="reel-high"></dd>
-          </div>
-        </dl>
-        <div class="stat stat-wide">
-          <span class="stat-label" id="distribution-label">Répartition</span>
-          <div class="histogram" id="histogram">
-            <ul class="histogram-columns" id="distribution" aria-labelledby="distribution-label"></ul>
-            <span class="histogram-median" id="histogram-median" aria-hidden="true" hidden><span>médiane</span></span>
+          <div class="stat stat-wide">
+            <span class="stat-label" id="distribution-label">Répartition</span>
+            <div class="histogram" id="histogram">
+              <ul class="histogram-columns" id="distribution" aria-labelledby="distribution-label"></ul>
+              <span class="histogram-median" id="histogram-median" aria-hidden="true" hidden><span>médiane</span></span>
+            </div>
           </div>
         </div>
         </div>
