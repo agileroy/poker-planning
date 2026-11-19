@@ -444,6 +444,42 @@ export function formatMean(mean) {
   return mean === null || mean === undefined || Number.isNaN(mean) ? '–' : meanFormatter.format(mean);
 }
 
+/**
+ * Histogramme des votes : une colonne par cran de l'échelle, du plus petit au plus grand
+ * vote chiffré (crans non joués compris, à 0), puis `?` et ciseaux s'ils ont été joués.
+ * `top` marque la ou les cartes les plus jouées ; `meanPosition` place la moyenne entre
+ * les colonnes chiffrées (0 = première colonne), ou vaut null s'il y a moins de deux crans.
+ * @param {{value: string, label: string, count: number}[]} distribution
+ * @param {number|null} mean
+ */
+export function computeHistogram(distribution, mean) {
+  const countOf = (value) => distribution.find((e) => e.value === value)?.count ?? 0;
+  const played = NUMERIC_SCALE.filter((value) => countOf(value) > 0);
+  const scale = played.length
+    ? NUMERIC_SCALE.slice(NUMERIC_SCALE.indexOf(played[0]), NUMERIC_SCALE.indexOf(played.at(-1)) + 1)
+    : [];
+  const others = distribution.filter((e) => !isNumericCard(e.value)).map((e) => e.value);
+  const maxCount = Math.max(0, ...distribution.map((e) => e.count));
+  const column = (value, numeric) => {
+    const count = countOf(value);
+    return { value, label: cardByValue(value).label, count, numeric, top: count > 0 && count === maxCount };
+  };
+
+  let meanPosition = null;
+  if (scale.length >= 2 && mean !== null) {
+    const values = scale.map(Number);
+    const i = Math.max(0, values.findLastIndex((v) => v <= mean));
+    const next = Math.min(i + 1, values.length - 1);
+    meanPosition = next === i ? i : i + (mean - values[i]) / (values[next] - values[i]);
+  }
+
+  return {
+    columns: [...scale.map((v) => column(v, true)), ...others.map((v) => column(v, false))],
+    maxCount,
+    meanPosition,
+  };
+}
+
 /** Résultats d'un tour révélé, à partir de la liste des valeurs votées. */
 export function computeResults(values) {
   const valid = values.filter(isValidCard);
@@ -461,6 +497,7 @@ export function computeResults(values) {
   return {
     voteCount: valid.length,
     distribution,
+    histogram: computeHistogram(distribution, mean),
     mean,
     meanLabel: formatMean(mean),
     consensus,

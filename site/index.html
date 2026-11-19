@@ -179,14 +179,13 @@
             <span class="stat-value" id="mean"></span>
           </div>
           <div class="stat stat-wide">
-            <span class="stat-label">Répartition</span>
-            <ul class="distribution" id="distribution"></ul>
+            <span class="stat-label" id="distribution-label">Répartition</span>
+            <div class="histogram" id="histogram">
+              <ul class="histogram-columns" id="distribution" aria-labelledby="distribution-label"></ul>
+              <span class="histogram-mean" id="histogram-mean" aria-hidden="true" hidden><span>moyenne</span></span>
+            </div>
           </div>
         </div>
-        <dl class="extremes" id="extremes" hidden>
-          <div class="extreme extreme-low"><dt>Plus bas</dt><dd id="extreme-low"></dd></div>
-          <div class="extreme extreme-high"><dt>Plus haut</dt><dd id="extreme-high"></dd></div>
-        </dl>
         </div>
         <div class="results-messages">
         <div class="alert-card alert-gap" id="gap" hidden>

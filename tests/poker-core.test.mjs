@@ -436,3 +436,30 @@ test('votants et observateurs séparés, chacun par ordre alphabétique', () => 
   assert.equal(view.participants.length, 4);
   assert.deepEqual(buildRoomView(room(), 'uJulie').observers, []);
 });
+
+// ---------------------------------------------------------------- Histogramme
+
+const columnsOf = (votes) => computeResults(votes).histogram.columns
+  .map(({ value, count, top }) => `${value}:${count}${top ? '*' : ''}`).join(' ');
+
+test('histogramme : du plus petit au plus grand vote, sans le reste de l\'échelle', () => {
+  assert.equal(columnsOf(['2', '2', '2', '2', '3', '3']), '2:4* 3:2');
+});
+
+test('histogramme : les crans non joués entre les bornes sont à 0', () => {
+  assert.equal(columnsOf(['2', '3', '3', '3', '8', '8']), '2:1 3:3* 5:0 8:2');
+});
+
+test('histogramme : ? et ciseaux après l\'échelle, s\'ils sont joués', () => {
+  assert.equal(columnsOf(['1', '3', '?', 'scissors', 'scissors']), '1:1 2:0 3:1 ?:1 scissors:2*');
+  assert.equal(columnsOf(['?', '?']), '?:2*');
+});
+
+test('histogramme : position de la moyenne entre les colonnes', () => {
+  const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} ≠ ${expected}`);
+  near(computeResults(['2', '2', '2', '2', '3', '3']).histogram.meanPosition, 1 / 3);
+  // 2, 3, 3, 3, 8, 8 : moyenne 4,5, entre 3 (colonne 1) et 5 (colonne 2)
+  near(computeResults(['2', '3', '3', '3', '8', '8']).histogram.meanPosition, 1.75);
+  assert.equal(computeResults(['3', '3']).histogram.meanPosition, null);
+  assert.equal(computeResults(['?']).histogram.meanPosition, null);
+});

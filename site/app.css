@@ -469,21 +469,52 @@ main { max-width: 960px; margin: 0 auto; padding: 0 16px 32px; }
 .stat { display: grid; gap: 4px; }
 .stat-label { color: var(--muted); font-size: 0.875rem; }
 .stat-value { font-size: 2rem; font-weight: 800; line-height: 1; }
-.distribution { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
-.distribution li {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 4px 10px; border-radius: 999px;
-  background: var(--accent-soft);
-  font-weight: 650;
+.histogram {
+  --columns: 1; --gap: 8px; --plot: 120px;
+  position: relative; padding-top: 20px;
+  width: min(100%, calc(var(--columns) * 76px));
 }
-.extremes { margin: 14px 0 0; display: grid; gap: 6px; }
-.extreme { display: flex; align-items: baseline; gap: 10px; }
-.extreme dt { flex: none; width: 5.5em; color: var(--muted); font-size: 0.875rem; }
-.extreme dt::before { display: inline-block; width: 1.1em; font-weight: 800; }
-.extreme-low dt::before { content: "↓"; }
-.extreme-high dt::before { content: "↑"; }
-.extreme dd { margin: 0; font-weight: 650; overflow-wrap: anywhere; }
-.extreme-value { display: inline-block; min-width: 1.6em; padding: 0 6px; margin-right: 6px; border-radius: 6px; background: var(--accent-soft); text-align: center; }
+.histogram-columns {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(var(--columns), minmax(0, 1fr)); gap: var(--gap);
+  align-items: end;
+}
+.histogram-column { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: stretch; }
+.histogram-column:not(.is-off-scale) + .is-off-scale { margin-left: 8px; }
+.histogram-column:not(.is-off-scale) + .is-off-scale::before {
+  content: ""; position: absolute; left: calc(-4px - var(--gap) / 2); top: 0; bottom: 0;
+  border-left: 1px dashed var(--border);
+}
+.histogram-bar {
+  height: max(28px, calc(var(--ratio) * var(--plot)));
+  display: flex; justify-content: center; padding-top: 5px;
+  border-radius: 8px 8px 3px 3px;
+  background: var(--accent-soft); color: var(--text);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 45%, transparent);
+  font-weight: 750; line-height: 1;
+  transform-origin: bottom; animation: grow-up 0.35s ease-out;
+}
+.histogram-column.is-top .histogram-bar { background: var(--accent); color: var(--accent-text); box-shadow: none; }
+.histogram-column.is-empty .histogram-bar { height: 3px; padding: 0; border-radius: 2px; background: var(--border); animation: none; }
+.histogram-zero { text-align: center; color: var(--muted); font-size: 0.875rem; margin-bottom: 4px; }
+.histogram-value {
+  margin-top: 6px; text-align: center;
+  font-weight: 800; font-size: 1.05rem; line-height: 1.2;
+  display: flex; justify-content: center;
+}
+.histogram-column.is-empty .histogram-value { color: var(--muted); font-weight: 600; }
+.histogram-value .scissors-icon { width: 18px; height: 18px; }
+.histogram-mean {
+  position: absolute; z-index: 0; top: 16px; bottom: calc(1.3em + 8px);
+  left: calc((100% - (var(--columns) - 1) * var(--gap)) / var(--columns) * (var(--mean) + 0.5) + var(--mean) * var(--gap));
+  border-left: 2px dashed var(--muted); margin-left: -1px;
+  pointer-events: none;
+}
+.histogram-mean span {
+  position: absolute; top: -18px; left: 0; transform: translateX(-50%);
+  color: var(--muted); font-size: 0.75rem; white-space: nowrap;
+}
+@keyframes grow-up { from { transform: scaleY(0); } to { transform: none; } }
 
 .mini-card.is-extreme { border-width: 3px; position: relative; }
 .mini-card.is-extreme::after {
